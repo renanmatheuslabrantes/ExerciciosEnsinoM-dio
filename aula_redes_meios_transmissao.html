@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Redes — Meios de Transmissão</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111520;
+    --surface2: #171e2e;
+    --border: #1e2a40;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --danger: #ef4444;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lora', serif;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ---- NOISE TEXTURE ---- */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+  @keyframes gridPulse {
+    0%,100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    animation: glowPulse 6s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); }
+    50% { transform: translate(-50%,-50%) scale(1.15); }
+  }
+  .hero-badge {
+    position: relative;
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 999px;
+    padding: .35rem 1.1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--accent);
+    letter-spacing: .08em;
+    margin-bottom: 2rem;
+    animation: fadeDown .8s ease both;
+  }
+  .badge-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1.5s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .hero h1 {
+    position: relative;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    animation: fadeDown .9s .1s ease both;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    position: relative;
+    max-width: 560px;
+    margin: 1.5rem auto 0;
+    font-size: 1.1rem;
+    color: var(--muted);
+    animation: fadeDown 1s .2s ease both;
+  }
+  .hero-chips {
+    position: relative;
+    display: flex; flex-wrap: wrap; gap: .6rem;
+    justify-content: center;
+    margin-top: 2.5rem;
+    animation: fadeDown 1s .3s ease both;
+  }
+  .chip {
+    padding: .4rem .9rem;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+  }
+  .chip-cyan  { background: rgba(0,229,255,.1); color: #00e5ff; border: 1px solid rgba(0,229,255,.2); }
+  .chip-purple{ background: rgba(124,58,237,.15); color: #a78bfa; border: 1px solid rgba(124,58,237,.25); }
+  .chip-amber { background: rgba(245,158,11,.1); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+  .chip-green { background: rgba(16,185,129,.1); color: #34d399; border: 1px solid rgba(16,185,129,.2); }
+  .scroll-hint {
+    position: relative;
+    margin-top: 4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--muted);
+    letter-spacing: .1em;
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    animation: fadeDown 1s .5s ease both;
+  }
+  .scroll-line {
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollLine 1.5s ease-in-out infinite;
+  }
+  @keyframes scrollLine { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+  /* ---- NAV ---- */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,12,16,.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: .75rem 2rem;
+    display: flex; align-items: center; gap: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .nav-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    margin-right: 1rem;
+  }
+  .nav-link {
+    font-family: 'Syne', sans-serif;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: .3rem .7rem;
+    border-radius: 6px;
+    transition: color .2s, background .2s;
+  }
+  .nav-link:hover { color: var(--accent); background: rgba(0,229,255,.06); }
+
+  /* ---- LAYOUT ---- */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  section { padding: 5rem 0; }
+
+  /* ---- SECTION HEADER ---- */
+  .sec-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .15em;
+    color: var(--accent);
+    margin-bottom: .75rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .sec-label::before {
+    content: '';
+    width: 28px; height: 1px;
+    background: var(--accent);
+  }
+  .sec-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    letter-spacing: -.02em;
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+  }
+  .sec-title span { color: var(--accent); }
+
+  /* ---- PROSE ---- */
+  p { margin-bottom: 1.2rem; color: #cbd5e1; }
+  p strong { color: var(--text); font-weight: 600; }
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text);
+    margin: 2rem 0 .75rem;
+  }
+  h3 .icon { margin-right: .5rem; }
+
+  /* ---- CARDS GRID ---- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--border); margin: 2.5rem 0; }
+  .card {
+    background: var(--surface);
+    padding: 1.8rem;
+    transition: background .2s;
+  }
+  .card:hover { background: var(--surface2); }
+  .card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: .5rem;
+  }
+  .card-desc { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+
+  /* ---- TIMELINE ---- */
+  .timeline { position: relative; padding: 1rem 0; margin: 2rem 0; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 20px; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  }
+  .tl-item {
+    position: relative;
+    padding-left: 60px;
+    margin-bottom: 2.5rem;
+  }
+  .tl-dot {
+    position: absolute;
+    left: 12px; top: 4px;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tl-dot::after {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .tl-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+    margin-bottom: .4rem;
+  }
+  .tl-desc { font-size: .9rem; color: var(--muted); }
+
+  /* ---- COMPARISON TABLE ---- */
+  .table-wrap { overflow-x: auto; margin: 2rem 0; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); }
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .08em;
+    color: var(--accent);
+    padding: 1rem 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: .85rem 1.2rem;
+    font-size: .88rem;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(30,42,64,.5);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(0,229,255,.02); }
+  .tag {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    font-weight: 700;
+  }
+  .tag-g { background: rgba(16,185,129,.15); color: #34d399; }
+  .tag-y { background: rgba(245,158,11,.12); color: #fbbf24; }
+  .tag-r { background: rgba(239,68,68,.12); color: #f87171; }
+  .tag-b { background: rgba(0,229,255,.1); color: #00e5ff; }
+
+  /* ---- CALLOUT ---- */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(0,229,255,.04);
+    border-radius: 0 12px 12px 0;
+    padding: 1.2rem 1.5rem;
+    margin: 2rem 0;
+    font-size: .92rem;
+    color: #94a3b8;
+  }
+  .callout strong { color: var(--accent); }
+  .callout.warn { border-color: var(--accent3); background: rgba(245,158,11,.04); }
+  .callout.warn strong { color: var(--accent3); }
+  .callout.tip { border-color: var(--accent4); background: rgba(16,185,129,.04); }
+  .callout.tip strong { color: var(--accent4); }
+
+  /* ---- CODE BLOCK ---- */
+  .code-wrap {
+    background: #080b12;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2);
+    padding: .6rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .d1 { background: #ef4444; } .d2 { background: #f59e0b; } .d3 { background: #10b981; }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--muted);
+    letter-spacing: .1em;
+  }
+  pre {
+    padding: 1.4rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    line-height: 1.8;
+    color: #a9c5e8;
+  }
+  pre .kw { color: #c792ea; }
+  pre .fn { color: #82aaff; }
+  pre .str { color: #c3e88d; }
+  pre .cm { color: #546e7a; }
+  pre .acc { color: #00e5ff; }
+  pre .num { color: #f78c6c; }
+
+  /* ---- DOWNLOAD SECTION ---- */
+  .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 2rem 0; }
+  .dl-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: flex; flex-direction: column; gap: .8rem;
+    transition: border-color .25s, transform .25s;
+  }
+  .dl-card:hover { border-color: rgba(0,229,255,.4); transform: translateY(-2px); }
+  .dl-card-head { display: flex; align-items: center; gap: .8rem; }
+  .dl-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .dl-icon.cyan { background: rgba(0,229,255,.1); }
+  .dl-icon.purple { background: rgba(124,58,237,.15); }
+  .dl-icon.amber { background: rgba(245,158,11,.1); }
+  .dl-icon.green { background: rgba(16,185,129,.1); }
+  .dl-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--text);
+  }
+  .dl-ver { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--muted); }
+  .dl-desc { font-size: .83rem; color: var(--muted); line-height: 1.55; }
+  .dl-link {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+    padding: .45rem .9rem;
+    border: 1px solid rgba(0,229,255,.25);
+    border-radius: 8px;
+    background: rgba(0,229,255,.06);
+    transition: background .2s;
+    width: fit-content;
+  }
+  .dl-link:hover { background: rgba(0,229,255,.12); }
+
+  /* ---- EXERCISES ---- */
+  #exercicios { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .ex-grid { display: flex; flex-direction: column; gap: 1rem; margin-top: 2.5rem; }
+  .ex-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color .25s;
+  }
+  .ex-card:hover { border-color: rgba(0,229,255,.3); }
+  .ex-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.2rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .ex-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    font-weight: 700;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ex-num.c { background: rgba(0,229,255,.1); color: var(--accent); border: 1px solid rgba(0,229,255,.2); }
+  .ex-num.p { background: rgba(124,58,237,.12); color: #a78bfa; border: 1px solid rgba(124,58,237,.2); }
+  .ex-num.a { background: rgba(245,158,11,.1); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+  .ex-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .95rem;
+    flex: 1;
+  }
+  .ex-diff {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: .25rem .65rem;
+    border-radius: 999px;
+  }
+  .diff-easy { background: rgba(16,185,129,.1); color: #34d399; }
+  .diff-med  { background: rgba(245,158,11,.1); color: #fbbf24; }
+  .diff-hard { background: rgba(239,68,68,.1); color: #f87171; }
+  .ex-arrow {
+    color: var(--muted);
+    transition: transform .25s;
+    font-size: .9rem;
+    margin-left: .5rem;
+  }
+  .ex-card.open .ex-arrow { transform: rotate(90deg); color: var(--accent); }
+  .ex-body {
+    display: none;
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.2rem;
+  }
+  .ex-card.open .ex-body { display: block; }
+  .ex-body p { font-size: .9rem; color: #94a3b8; margin-bottom: .8rem; }
+  .ex-body ul, .ex-body ol { margin: .8rem 0 1rem 1.4rem; color: #94a3b8; font-size: .9rem; }
+  .ex-body li { margin-bottom: .4rem; }
+  .ex-body .cmd {
+    display: block;
+    background: #080b12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    color: #a9c5e8;
+    margin: .5rem 0;
+    overflow-x: auto;
+  }
+  .ex-tool {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: .2rem .6rem;
+    border-radius: 6px;
+    margin-bottom: .8rem;
+  }
+  .expected {
+    background: rgba(16,185,129,.04);
+    border: 1px solid rgba(16,185,129,.15);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: .85rem;
+    color: #6ee7b7;
+    margin-top: 1rem;
+  }
+  .expected strong { color: #34d399; display: block; margin-bottom: .4rem; font-family: 'JetBrains Mono', monospace; font-size: .72rem; letter-spacing: .08em; }
+
+  /* ---- FOOTER ---- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    letter-spacing: .06em;
+  }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ---- SEPARATOR ---- */
+  .sep { height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); margin: 3rem 0; }
+
+  /* ---- DIAGRAM ---- */
+  .diagram-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+  .diagram-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .12em;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .spectrum {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 500px;
+  }
+  .spec-row { display: flex; align-items: center; gap: 1rem; }
+  .spec-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    width: 110px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .spec-bar {
+    height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; padding: 0 .8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    font-weight: 700;
+    color: rgba(255,255,255,.85);
+    white-space: nowrap;
+  }
+
+  @media(max-width: 640px) {
+    .hero h1 { font-size: 2.4rem; }
+    .sec-title { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== HERO ====== -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    MÓDULO · INFRAESTRUTURA DE REDES
+  </div>
+  <h1>Meios de<br/><span>Transmissão</span></h1>
+  <p class="hero-sub">Uma aula completa sobre os canais físicos e lógicos que carregam os dados pelo mundo.</p>
+  <div class="hero-chips">
+    <span class="chip chip-cyan">Par Trançado</span>
+    <span class="chip chip-purple">Fibra Óptica</span>
+    <span class="chip chip-amber">Cabo Coaxial</span>
+    <span class="chip chip-green">Sem Fio</span>
+    <span class="chip chip-cyan">Packet Tracer</span>
+    <span class="chip chip-purple">Wireshark</span>
+  </div>
+  <div class="scroll-hint">
+    SCROLL PARA COMEÇAR
+    <span class="scroll-line"></span>
+  </div>
+</div>
+
+<!-- ====== NAV ====== -->
+<nav>
+  <span class="nav-logo">⚡ REDES</span>
+  <a href="#conceitos"   class="nav-link">01 · Conceitos</a>
+  <a href="#guiados"     class="nav-link">02 · Guiados</a>
+  <a href="#naoguiados"  class="nav-link">03 · Não Guiados</a>
+  <a href="#comparativo" class="nav-link">04 · Comparativo</a>
+  <a href="#ferramentas" class="nav-link">05 · Ferramentas</a>
+  <a href="#exercicios"  class="nav-link">06 · Exercícios</a>
+</nav>
+
+<!-- ====== 01 CONCEITOS ====== -->
+<section id="conceitos">
+  <div class="container fade-in">
+    <p class="sec-label">01 — FUNDAMENTOS</p>
+    <h2 class="sec-title">O que são Meios de <span>Transmissão</span>?</h2>
+    <p>Em redes de computadores, <strong>meio de transmissão</strong> é o caminho físico ou lógico pelo qual um sinal viaja do emissor até o receptor. Sem esse canal, a comunicação entre dispositivos simplesmente não existe.</p>
+    <p>Os meios se dividem em dois grandes grupos: <strong>guiados</strong> (o sinal percorre um cabo físico) e <strong>não guiados</strong> (o sinal se propaga pelo ar, espaço ou água).</p>
+
+    <div class="callout">
+      <strong>Analogia rápida:</strong> Pense no meio de transmissão como uma rodovia. A fibra óptica é uma autoestrada de 8 pistas, o Wi-Fi é uma estrada de terra compartilhada com todo o bairro, e o cabo coaxial velho é uma rua de mão única com sinal de stop a cada quadra.
+    </div>
+
+    <h3><span class="icon">📐</span>Conceitos-Chave</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="card-icon">📶</span>
+        <div class="card-title">Largura de Banda (Bandwidth)</div>
+        <div class="card-desc">Quantidade máxima de dados transmitidos por segundo. Medida em bps, Kbps, Mbps, Gbps.</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">⏱️</span>
+        <div class="card-title">Latência (Delay)</div>
+        <div class="card-desc">Tempo que um bit leva para ir do ponto A ao ponto B. Quanto menor, melhor para aplicações em tempo real.</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">🔀</span>
+        <div class="card-title">Atenuação</div>
+        <div class="card-desc">Perda de energia do sinal ao longo da distância. Todo meio atenua o sinal em maior ou menor grau.</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">🌊</span>
+        <div class="card-title">Interferência / Ruído</div>
+        <div class="card-desc">Perturbações externas que degradam o sinal. Mede-se pela relação S/N (Sinal/Ruído).</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">🔁</span>
+        <div class="card-title">Modo de Transmissão</div>
+        <div class="card-desc">Simplex (um sentido), Half-Duplex (dois sentidos, alternado) ou Full-Duplex (dois sentidos simultâneos).</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">📏</span>
+        <div class="card-title">Taxa de Erro de Bit (BER)</div>
+        <div class="card-desc">Proporção de bits corrompidos em relação ao total transmitido. Fibra óptica tem BER próxima de 10⁻¹².</div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <h3><span class="icon">📡</span>Espectro Eletromagnético — onde cada meio opera</h3>
+    <div class="diagram-box">
+      <p class="diagram-title">FREQUÊNCIA × MEIO DE TRANSMISSÃO</p>
+      <div class="spectrum">
+        <div class="spec-row">
+          <span class="spec-label">Rádio AM/FM</span>
+          <div class="spec-bar" style="width:120px; background: linear-gradient(90deg,#6366f1,#8b5cf6);">0.1 – 300 MHz</div>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Wi-Fi / BT</span>
+          <div class="spec-bar" style="width:200px; background: linear-gradient(90deg,#3b82f6,#06b6d4);">2.4 – 5 GHz</div>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">5G / mmWave</span>
+          <div class="spec-bar" style="width:270px; background: linear-gradient(90deg,#0ea5e9,#00e5ff);">24 – 100 GHz</div>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Par Trançado</span>
+          <div class="spec-bar" style="width:180px; background: linear-gradient(90deg,#10b981,#34d399);">100 MHz – 2 GHz</div>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Cabo Coaxial</span>
+          <div class="spec-bar" style="width:220px; background: linear-gradient(90deg,#f59e0b,#fbbf24);">1 MHz – 1 GHz</div>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Fibra Óptica</span>
+          <div class="spec-bar" style="width:420px; background: linear-gradient(90deg,#f97316,#ef4444,#ec4899,#a855f7);">10¹² – 10¹⁵ Hz (luz infravermelha)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 02 MEIOS GUIADOS ====== -->
+<section id="guiados">
+  <div class="container fade-in">
+    <p class="sec-label">02 — MEIOS GUIADOS</p>
+    <h2 class="sec-title">Cabos: o <span>fio condutor</span> das redes</h2>
+    <p>Meios guiados são aqueles em que o sinal é <strong>confinado a um condutor físico</strong>. Cada tecnologia tem características distintas de custo, velocidade, distância e imunidade a ruído.</p>
+
+    <!-- PAR TRANÇADO -->
+    <h3>🔵 Par Trançado (Twisted Pair)</h3>
+    <p>O cabo mais comum em redes locais. Consiste em pares de fios de cobre entrelaçados em hélice para reduzir a interferência eletromagnética mútua (crosstalk).</p>
+    <p><strong>UTP (Unshielded Twisted Pair):</strong> sem blindagem, mais barato e fácil de instalar. <strong>STP (Shielded Twisted Pair):</strong> com blindagem metálica, melhor para ambientes industriais com muita interferência.</p>
+
+    <div class="callout">
+      <strong>Por que torcer os pares?</strong> Ao torcer dois fios que carregam sinais opostos, os campos eletromagnéticos gerados se cancelam mutuamente, reduzindo drasticamente a emissão e absorção de ruído.
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Categoria</th><th>Velocidade Máx.</th><th>Frequência</th><th>Aplicação típica</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cat 5</td><td>100 Mbps</td><td>100 MHz</td><td>Fast Ethernet</td><td><span class="tag tag-r">Obsoleto</span></td></tr>
+          <tr><td>Cat 5e</td><td>1 Gbps</td><td>100 MHz</td><td>Gigabit Ethernet (até 100m)</td><td><span class="tag tag-y">Legado</span></td></tr>
+          <tr><td>Cat 6</td><td>10 Gbps</td><td>250 MHz</td><td>10G (até 55m)</td><td><span class="tag tag-g">Atual</span></td></tr>
+          <tr><td>Cat 6A</td><td>10 Gbps</td><td>500 MHz</td><td>10G (até 100m)</td><td><span class="tag tag-g">Recomendado</span></td></tr>
+          <tr><td>Cat 7</td><td>10–40 Gbps</td><td>600 MHz</td><td>Data centers</td><td><span class="tag tag-b">Premium</span></td></tr>
+          <tr><td>Cat 8</td><td>25–40 Gbps</td><td>2000 MHz</td><td>Data centers (até 30m)</td><td><span class="tag tag-b">Premium</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>🟡 Cabo Coaxial</h3>
+    <p>Composto por um <strong>condutor central</strong> de cobre, rodeado por isolamento dielétrico, malha metálica condutora e capa protetora externa. A estrutura coaxial oferece excelente blindagem contra interferências externas.</p>
+    <p>Muito usado em TV a cabo (CATV), redes DOCSIS (internet via cabo) e antigas redes Ethernet 10BASE2/10BASE5. Ainda relevante em aplicações de RF, câmeras CCTV e instalações de satélite.</p>
+
+    <div class="cards" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="card">
+        <span class="card-icon">📺</span>
+        <div class="card-title">RG-6</div>
+        <div class="card-desc">TV a cabo e satélite. Impedância 75Ω. O mais encontrado em residências.</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">📡</span>
+        <div class="card-title">RG-58</div>
+        <div class="card-desc">Redes 10BASE2 (Thinnet). Impedância 50Ω. Praticamente extinto em redes.</div>
+      </div>
+    </div>
+
+    <h3>🔴 Fibra Óptica</h3>
+    <p>Transmite dados como <strong>pulsos de luz</strong> através de filamentos de vidro ou plástico ultrapuro. Com largura de banda de terabits e latência baixíssima, é o backbone da internet global.</p>
+    <p>O princípio físico é a <strong>reflexão interna total</strong>: quando a luz atinge a interface núcleo–casca com ângulo maior que o ângulo crítico, ela é 100% refletida, propagando-se sem perda através do cabo.</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-title">Fibra Monomodo (SMF — Single Mode Fiber)</div>
+        <div class="tl-desc">Núcleo ultrafino (8–10 µm). Apenas um modo de propagação da luz. Distâncias de até 80 km sem repetidor. Usada em backbones e links de longa distância. Laser como fonte de luz. Custo maior.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-title">Fibra Multimodo (MMF — Multi Mode Fiber)</div>
+        <div class="tl-desc">Núcleo maior (50 ou 62.5 µm). Múltiplos modos de propagação. Distâncias de até 2 km. Usada em LANs, data centers. LED ou VCSEL como fonte de luz. Custo menor.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-title">DWDM — Dense Wavelength Division Multiplexing</div>
+        <div class="tl-desc">Técnica que permite transmitir dezenas de comprimentos de onda distintos (canais) simultaneamente sobre uma única fibra, multiplicando drasticamente a capacidade total.</div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <strong>💡 Dica de instalação:</strong> O raio de curvatura mínimo da fibra óptica é crítico. Dobrar o cabo além do limite especificado causa microfraturas e aumento de atenuação. Em Cat 6A, o mesmo cuidado vale para não apertar as abraçadeiras.
+    </div>
+  </div>
+</section>
+
+<!-- ====== 03 NÃO GUIADOS ====== -->
+<section id="naoguiados">
+  <div class="container fade-in">
+    <p class="sec-label">03 — MEIOS NÃO GUIADOS</p>
+    <h2 class="sec-title">O ar como <span>canal</span></h2>
+    <p>Nos meios não guiados, o sinal eletromagnético se propaga livremente. A vantagem é a mobilidade; a desvantagem é o compartilhamento do espectro e a susceptibilidade a interferências.</p>
+
+    <h3>📶 Wi-Fi (IEEE 802.11)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Padrão</th><th>Freq.</th><th>Vel. Máx.</th><th>Alcance aprox.</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>802.11b</td><td>2.4 GHz</td><td>11 Mbps</td><td>35 m</td><td><span class="tag tag-r">Obsoleto</span></td></tr>
+          <tr><td>802.11g</td><td>2.4 GHz</td><td>54 Mbps</td><td>38 m</td><td><span class="tag tag-r">Obsoleto</span></td></tr>
+          <tr><td>802.11n (Wi-Fi 4)</td><td>2.4/5 GHz</td><td>600 Mbps</td><td>70 m</td><td><span class="tag tag-y">Legado</span></td></tr>
+          <tr><td>802.11ac (Wi-Fi 5)</td><td>5 GHz</td><td>3.5 Gbps</td><td>35 m</td><td><span class="tag tag-g">Comum</span></td></tr>
+          <tr><td>802.11ax (Wi-Fi 6)</td><td>2.4/5/6 GHz</td><td>9.6 Gbps</td><td>35 m</td><td><span class="tag tag-g">Atual</span></td></tr>
+          <tr><td>802.11be (Wi-Fi 7)</td><td>2.4/5/6 GHz</td><td>46 Gbps</td><td>35 m</td><td><span class="tag tag-b">Novo</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <strong>⚠️ 2.4 GHz vs 5 GHz:</strong> A faixa de 2.4 GHz tem maior alcance e penetração em paredes, mas apenas 3 canais não sobrepostos (1, 6, 11) e sofre interferência de micro-ondas e Bluetooth. A faixa de 5 GHz tem mais canais e velocidade, mas menor alcance.
+    </div>
+
+    <h3>📱 Celular — Gerações da Tecnologia Móvel</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="card-icon">2️⃣</span>
+        <div class="card-title">2G (GSM/GPRS/EDGE)</div>
+        <div class="card-desc">Voz digital e dados lentos. Ainda ativo como fallback em zonas rurais. Taxa: até 384 Kbps (EDGE).</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">3️⃣</span>
+        <div class="card-title">3G (UMTS/HSPA+)</div>
+        <div class="card-desc">Navegação web e streaming básico. Taxa: até 42 Mbps (HSPA+). Em processo de desativação.</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">4️⃣</span>
+        <div class="card-title">4G LTE / LTE-A</div>
+        <div class="card-desc">Padrão dominante atual. Taxa típica: 50–150 Mbps. Latência ~30-50 ms. Ampla cobertura.</div>
+      </div>
+      <div class="card">
+        <span class="card-icon">5️⃣</span>
+        <div class="card-title">5G NR</div>
+        <div class="card-desc">Até 20 Gbps (pico). Latência &lt;1 ms. Massive MIMO, beamforming. IoT industrial, cidades inteligentes.</div>
+      </div>
+    </div>
+
+    <h3>🛰️ Satélite e Outros</h3>
+    <p><strong>Satélites GEO</strong> (36.000 km) têm alta latência (~600 ms round-trip) mas cobertura continental. <strong>Satélites LEO</strong> como a constelação Starlink (550 km) têm latência de 20–40 ms mas requerem centenas de satélites para cobertura contínua.</p>
+    <p><strong>Bluetooth (IEEE 802.15):</strong> PAN de curto alcance (&lt;100m), baixo consumo. <strong>Zigbee / Z-Wave:</strong> IoT e automação residencial, baixíssimo consumo. <strong>WiMAX (802.16):</strong> MAN sem fio, alternativa ao ADSL em áreas sem cabeamento.</p>
+  </div>
+</section>
+
+<!-- ====== 04 COMPARATIVO ====== -->
+<section id="comparativo">
+  <div class="container fade-in">
+    <p class="sec-label">04 — ANÁLISE COMPARATIVA</p>
+    <h2 class="sec-title">Qual meio <span>escolher</span>?</h2>
+    <p>A escolha do meio de transmissão depende de múltiplos fatores: distância, largura de banda necessária, custo, ambiente físico, mobilidade e requisitos de segurança.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Meio</th><th>Velocidade</th><th>Distância máx.</th><th>Custo</th><th>Interferência</th><th>Uso típico</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Cat 5e</strong></td><td>1 Gbps</td><td>100 m</td>
+            <td><span class="tag tag-g">Baixo</span></td><td><span class="tag tag-y">Média</span></td>
+            <td>LAN corporativa legada</td>
+          </tr>
+          <tr>
+            <td><strong>Cat 6A</strong></td><td>10 Gbps</td><td>100 m</td>
+            <td><span class="tag tag-y">Médio</span></td><td><span class="tag tag-g">Baixa</span></td>
+            <td>LAN corporativa atual</td>
+          </tr>
+          <tr>
+            <td><strong>Coaxial RG-6</strong></td><td>1 Gbps+</td><td>500 m</td>
+            <td><span class="tag tag-y">Médio</span></td><td><span class="tag tag-g">Muito baixa</span></td>
+            <td>CATV, CCTV</td>
+          </tr>
+          <tr>
+            <td><strong>Fibra MM (OM3)</strong></td><td>10–100 Gbps</td><td>300–1000 m</td>
+            <td><span class="tag tag-r">Alto</span></td><td><span class="tag tag-b">Zero elétrica</span></td>
+            <td>Backbone intra-campus</td>
+          </tr>
+          <tr>
+            <td><strong>Fibra SM (OS2)</strong></td><td>100 Gbps+</td><td>80 km+</td>
+            <td><span class="tag tag-r">Alto</span></td><td><span class="tag tag-b">Zero elétrica</span></td>
+            <td>WAN, backbone metro</td>
+          </tr>
+          <tr>
+            <td><strong>Wi-Fi 6</strong></td><td>9.6 Gbps (teórico)</td><td>~35 m</td>
+            <td><span class="tag tag-y">Médio</span></td><td><span class="tag tag-r">Alta</span></td>
+            <td>LAN sem fio escritório</td>
+          </tr>
+          <tr>
+            <td><strong>4G LTE</strong></td><td>~100 Mbps</td><td>Km</td>
+            <td><span class="tag tag-y">Médio</span></td><td><span class="tag tag-r">Alta</span></td>
+            <td>Mobile broadband</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>Regra prática de projeto:</strong> Para infraestrutura nova em escritório: Cat 6A até os pontos de acesso, fibra monomodo entre andares/prédios. Wi-Fi como complemento para dispositivos móveis, nunca como substituto do cabeamento estruturado em alta demanda.
+    </div>
+  </div>
+</section>
+
+<!-- ====== 05 FERRAMENTAS ====== -->
+<section id="ferramentas">
+  <div class="container fade-in">
+    <p class="sec-label">05 — FERRAMENTAS</p>
+    <h2 class="sec-title">O que <span>baixar</span> e como usar</h2>
+    <p>Para praticar os conceitos de meios de transmissão, você precisa de dois tipos de ferramenta: <strong>simuladores de rede</strong> (para montar topologias e ver como os dados trafegam) e <strong>analisadores de tráfego</strong> (para capturar e examinar pacotes reais).</p>
+
+    <div class="dl-grid">
+
+      <div class="dl-card">
+        <div class="dl-card-head">
+          <div class="dl-icon cyan">🖧</div>
+          <div>
+            <div class="dl-name">Cisco Packet Tracer</div>
+            <div class="dl-ver">v8.2+ · Windows / Linux / macOS</div>
+          </div>
+        </div>
+        <div class="dl-desc">Simulador oficial da Cisco. Permite criar redes completas com switches, roteadores, cables e verificar o comportamento de protocolos — ideal para exercícios com meios guiados.</div>
+        <a class="dl-link" href="https://www.netacad.com/courses/packet-tracer" target="_blank">↗ Baixar (Netacad — grátis)</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-card-head">
+          <div class="dl-icon purple">🦈</div>
+          <div>
+            <div class="dl-name">Wireshark</div>
+            <div class="dl-ver">v4.x · Windows / Linux / macOS</div>
+          </div>
+        </div>
+        <div class="dl-desc">Analisador de protocolos de rede mais popular do mundo. Captura pacotes em tempo real, permite filtrar e dissecar cada camada — mostra na prática como os dados trafegam.</div>
+        <a class="dl-link" href="https://www.wireshark.org/download.html" target="_blank">↗ Baixar (wireshark.org)</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-card-head">
+          <div class="dl-icon amber">🖥️</div>
+          <div>
+            <div class="dl-name">GNS3</div>
+            <div class="dl-ver">v2.2+ · Windows / Linux / macOS</div>
+          </div>
+        </div>
+        <div class="dl-desc">Emulador de redes com imagens reais de IOS Cisco, Juniper e Linux. Ideal para laboratórios avançados. Integra com Wireshark para análise de tráfego.</div>
+        <a class="dl-link" href="https://www.gns3.com/software/download" target="_blank">↗ Baixar (gns3.com)</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-card-head">
+          <div class="dl-icon green">📊</div>
+          <div>
+            <div class="dl-name">iPerf3</div>
+            <div class="dl-ver">v3.x · Windows / Linux / macOS</div>
+          </div>
+        </div>
+        <div class="dl-desc">Ferramenta de linha de comando para medir largura de banda, jitter e perda de pacotes entre dois hosts. Perfeito para comparar meios guiados e sem fio na prática.</div>
+        <a class="dl-link" href="https://iperf.fr/iperf-download.php" target="_blank">↗ Baixar (iperf.fr)</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-card-head">
+          <div class="dl-icon cyan">🌐</div>
+          <div>
+            <div class="dl-name">Nmap</div>
+            <div class="dl-ver">v7.x · Windows / Linux / macOS</div>
+          </div>
+        </div>
+        <div class="dl-desc">Scanner de rede para descoberta de hosts, portas e serviços. Útil para mapear qual equipamento está em qual segmento e entender a topologia real da rede.</div>
+        <a class="dl-link" href="https://nmap.org/download" target="_blank">↗ Baixar (nmap.org)</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-card-head">
+          <div class="dl-icon purple">🔧</div>
+          <div>
+            <div class="dl-name">inSSIDer / Wi-Fi Analyzer</div>
+            <div class="dl-ver">Gratuito (Android) / inSSIDer (Win)</div>
+          </div>
+        </div>
+        <div class="dl-desc">Visualiza redes Wi-Fi ao redor, canais utilizados, força de sinal (RSSI) e sobreposição de canais. Essencial para entender interferências em meios não guiados.</div>
+        <a class="dl-link" href="https://www.metageek.com/inssider/" target="_blank">↗ Baixar (metageek.com)</a>
+      </div>
+
+    </div>
+
+    <div class="sep"></div>
+
+    <h3>🦈 Wireshark — Primeiros Passos</h3>
+    <p>Após instalar o Wireshark, siga este fluxo básico para capturar tráfego em sua interface de rede:</p>
+    <ol style="margin-left:1.5rem; color:#94a3b8; font-size:.92rem; line-height:2;">
+      <li>Abra o Wireshark com permissões de administrador.</li>
+      <li>Selecione a interface de rede ativa (Ethernet ou Wi-Fi).</li>
+      <li>Clique no ícone de barbatana azul para iniciar a captura.</li>
+      <li>Use filtros de exibição para isolar o tráfego de interesse.</li>
+      <li>Clique no quadrado vermelho para parar. Salve como .pcap.</li>
+    </ol>
+
+    <h3>Filtros Essenciais no Wireshark</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+        <span class="code-lang">WIRESHARK · DISPLAY FILTERS</span>
+      </div>
+      <pre><span class="cm">// Capturar apenas tráfego ICMP (ping)</span>
+<span class="acc">icmp</span>
+
+<span class="cm">// Tráfego de/para um IP específico</span>
+<span class="acc">ip.addr == 192.168.1.1</span>
+
+<span class="cm">// Apenas pacotes TCP na porta 80 ou 443</span>
+<span class="acc">tcp.port == 80 || tcp.port == 443</span>
+
+<span class="cm">// Ver negociação de três vias (handshake TCP)</span>
+<span class="acc">tcp.flags.syn == 1</span>
+
+<span class="cm">// Tráfego DNS</span>
+<span class="acc">dns</span>
+
+<span class="cm">// Descoberta de vizinhos ARP</span>
+<span class="acc">arp</span></pre>
+    </div>
+
+    <h3>⚙️ iPerf3 — Medindo Largura de Banda</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+        <span class="code-lang">TERMINAL · IPERF3</span>
+      </div>
+      <pre><span class="cm"># No servidor (Host B):</span>
+<span class="fn">iperf3</span> <span class="kw">-s</span>
+
+<span class="cm"># No cliente (Host A) — teste TCP padrão:</span>
+<span class="fn">iperf3</span> <span class="kw">-c</span> <span class="str">192.168.1.100</span>
+
+<span class="cm"># Teste UDP com bandwidth-alvo de 100Mbps:</span>
+<span class="fn">iperf3</span> <span class="kw">-c</span> <span class="str">192.168.1.100</span> <span class="kw">-u -b</span> <span class="num">100M</span>
+
+<span class="cm"># Teste de 30s em múltiplos streams paralelos:</span>
+<span class="fn">iperf3</span> <span class="kw">-c</span> <span class="str">192.168.1.100</span> <span class="kw">-t</span> <span class="num">30</span> <span class="kw">-P</span> <span class="num">4</span></pre>
+    </div>
+
+    <h3>🖧 Packet Tracer — Criando sua primeira topologia</h3>
+    <p>No Packet Tracer, os <strong>tipos de cabos</strong> refletem diretamente os meios de transmissão:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cabo no PT</th><th>Representa</th><th>Quando usar</th></tr></thead>
+        <tbody>
+          <tr><td>Copper Straight-Through</td><td>Par trançado (UTP)</td><td>PC→Switch, Switch→Router</td></tr>
+          <tr><td>Copper Crossover</td><td>Par trançado cruzado</td><td>PC→PC, Switch→Switch (sem Auto-MDIX)</td></tr>
+          <tr><td>Fiber (Optic)</td><td>Fibra óptica</td><td>Switch→Switch longa distância</td></tr>
+          <tr><td>Serial (DTE/DCE)</td><td>WAN serial (simula link ponto-a-ponto)</td><td>Router→Router (WAN)</td></tr>
+          <tr><td>Wireless (automático)</td><td>Wi-Fi 802.11</td><td>Laptop/SmartDevice→AP</td></tr>
+          <tr><td>Coaxial</td><td>Cabo coaxial</td><td>Módems de cabo, CATV</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 06 EXERCÍCIOS ====== -->
+<section id="exercicios">
+  <div class="container fade-in">
+    <p class="sec-label">06 — LABORATÓRIO PRÁTICO</p>
+    <h2 class="sec-title">10 Exercícios <span>Práticos</span></h2>
+    <p>Cada exercício foi projetado para fixar um conceito específico de meios de transmissão. Clique em cada um para expandir o enunciado, roteiro e resultado esperado.</p>
+
+    <div class="ex-grid">
+
+      <!-- EX 1 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num c">01</div>
+          <span class="ex-title">Ping e análise de latência por meio</span>
+          <span class="ex-diff diff-easy">FÁCIL</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ CMD / Terminal + Wireshark</span>
+          <p><strong>Objetivo:</strong> Medir e comparar a latência (RTT) de uma conexão cabeada (Ethernet) versus Wi-Fi no mesmo ambiente.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Conecte seu PC ao roteador via cabo Ethernet Cat 5e ou superior.</li>
+            <li>Execute 50 pings para o gateway padrão e anote o RTT médio:</li>
+          </ol>
+          <code class="cmd">ping -n 50 192.168.1.1</code>
+          <ol start="3">
+            <li>Desconecte o cabo e conecte via Wi-Fi. Repita o ping:</li>
+          </ol>
+          <code class="cmd">ping -n 50 192.168.1.1</code>
+          <ol start="4">
+            <li>Enquanto pinga, abra o Wireshark, filtre por <code>icmp</code> e observe os tempos entre Echo Request e Echo Reply.</li>
+            <li>Anote: RTT mínimo, médio, máximo e perda de pacotes de cada meio.</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Ethernet deverá apresentar RTT médio 30–80% menor que Wi-Fi e zero perda de pacotes. No Wireshark, os Echo Reply no Wi-Fi terão variação maior (jitter). Isso demonstra que meios guiados têm menor latência e jitter.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 2 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num c">02</div>
+          <span class="ex-title">Medição de throughput com iPerf3</span>
+          <span class="ex-diff diff-easy">FÁCIL</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ iPerf3 (dois computadores na mesma rede)</span>
+          <p><strong>Objetivo:</strong> Medir a largura de banda efetiva entre dois hosts, primeiro via cabo, depois via Wi-Fi.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Instale iPerf3 nos dois computadores.</li>
+            <li>No Host B (servidor), abra o terminal:</li>
+          </ol>
+          <code class="cmd">iperf3 -s</code>
+          <ol start="3">
+            <li>No Host A (cliente), com cabo Ethernet:</li>
+          </ol>
+          <code class="cmd">iperf3 -c [IP_DO_SERVIDOR] -t 20 -P 4</code>
+          <ol start="4">
+            <li>Anote Bandwidth (Mbps). Troque para Wi-Fi e repita.</li>
+            <li>Execute também teste UDP para medir jitter:</li>
+          </ol>
+          <code class="cmd">iperf3 -c [IP_DO_SERVIDOR] -u -b 500M -t 20</code>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Gigabit Ethernet: ~940 Mbps. Wi-Fi 5 próximo ao AP: 200–400 Mbps com jitter maior. Wi-Fi com obstruções: queda acentuada e perda de datagramas UDP. Comprova a superioridade dos meios guiados em ambientes congestionados.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 3 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num p">03</div>
+          <span class="ex-title">Topologia mista no Packet Tracer</span>
+          <span class="ex-diff diff-easy">FÁCIL</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ Cisco Packet Tracer</span>
+          <p><strong>Objetivo:</strong> Montar uma topologia usando três tipos diferentes de meios e verificar conectividade.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Crie a seguinte topologia no Packet Tracer:</li>
+          </ol>
+          <code class="cmd">PC1 ──[Copper Straight]── Switch1 ──[Fiber]── Switch2 ──[Copper Straight]── Router1
+                                                                  |
+                                                              [Wireless]
+                                                              Laptop1</code>
+          <ol start="2">
+            <li>Configure IPs estáticos: PC1 = 192.168.10.10/24, Laptop1 = 192.168.10.20/24, Router1 = 192.168.10.1/24.</li>
+            <li>Configure o Access Point com SSID "AULA-REDES" e sem senha.</li>
+            <li>Associe o Laptop1 ao AP via configuração wireless.</li>
+            <li>Use o modo Simulation para observar os pacotes ICMP percorrendo cada meio.</li>
+            <li>Faça ping de PC1 para Laptop1 e observe o PDU atravessando fibra e wireless.</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Ping bem-sucedido entre PC1 e Laptop1. No modo Simulation, visualize o pacote passando pelo cobre, depois pela fibra (ícone azul) e por fim pelo enlace wireless (ícone ondulado). Cada meio tem ícone visual distinto no PT.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 4 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num p">04</div>
+          <span class="ex-title">Análise de canal Wi-Fi com Wi-Fi Analyzer</span>
+          <span class="ex-diff diff-easy">FÁCIL</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ Wi-Fi Analyzer (Android) ou inSSIDer (Windows)</span>
+          <p><strong>Objetivo:</strong> Observar a ocupação do espectro 2.4 GHz e 5 GHz, identificar interferências e encontrar o canal ideal.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Instale o Wi-Fi Analyzer no smartphone ou inSSIDer no Windows.</li>
+            <li>Abra o aplicativo e observe a aba "Channel Graph" ou equivalente.</li>
+            <li>Identifique: quantas redes estão no canal 6 (2.4 GHz)? Há sobreposição?</li>
+            <li>Anote o RSSI (potência do sinal em dBm) do seu AP nos dois modos.</li>
+            <li>Vá a pontos diferentes do ambiente: a cada 5 metros, anote o RSSI.</li>
+            <li>Monte uma tabela: Distância × RSSI × Velocidade de link estimada.</li>
+            <li>Identifique qual canal 5 GHz está menos congestionado e recomende-o.</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Identificação de canal saturado (múltiplas redes se sobrepondo) no 2.4 GHz. Curva de queda de RSSI com a distância (~3 dBm a cada dobramento de distância, conforme lei do quadrado inverso). Canal recomendado 5 GHz: o com menor ocupação na faixa UNII-1 ou UNII-3.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 5 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num p">05</div>
+          <span class="ex-title">Captura e análise de frames Ethernet no Wireshark</span>
+          <span class="ex-diff diff-med">MÉDIO</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ Wireshark</span>
+          <p><strong>Objetivo:</strong> Capturar tráfego real da sua placa de rede, identificar o preâmbulo Ethernet, endereços MAC e calcular a eficiência do enlace.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Inicie uma captura no Wireshark na interface Ethernet ativa.</li>
+            <li>Abra o navegador e acesse qualquer site HTTP (ex: <em>http://example.com</em>).</li>
+            <li>Pare a captura. Filtre por: <code>http</code></li>
+            <li>Clique em um pacote HTTP GET. No painel "Frame", observe o tamanho total do frame.</li>
+            <li>Expanda a camada "Ethernet II" e identifique: MAC de origem, MAC de destino, Ethertype.</li>
+            <li>Calcule o overhead do cabeçalho Ethernet: Dest(6B) + Src(6B) + Type(2B) + FCS(4B) = 18 bytes.</li>
+            <li>Para um payload de 1460 bytes (MSS típico), calcule a eficiência: 1460/(1460+18) × 100.</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Eficiência de ~98.8% (overhead desprezível). MAC de destino do gateway. Ethertype 0x0800 (IPv4) ou 0x86DD (IPv6). Compreensão de que o overhead do meio físico Ethernet é mínimo, ao contrário do Wi-Fi que adiciona cabeçalhos 802.11 maiores (~36 bytes de cabeçalho MAC + Preamble de 16 bytes).
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 6 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num p">06</div>
+          <span class="ex-title">Simulação de atenuação por distância no Packet Tracer</span>
+          <span class="ex-diff diff-med">MÉDIO</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ Cisco Packet Tracer</span>
+          <p><strong>Objetivo:</strong> Simular o efeito da distância no meio sem fio e entender o limite de 100m do par trançado.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Monte uma topologia com 5 laptops e 1 Access Point no centro.</li>
+            <li>Posicione os laptops progressivamente mais distantes do AP: 10m, 20m, 35m, 60m e 100m (escale visualmente no PT).</li>
+            <li>Configure todos com IP estático na mesma sub-rede.</li>
+            <li>Verifique quais conseguem se associar ao AP e quais perdem sinal.</li>
+            <li>Monte também uma topologia com 3 PCs conectados em série via par trançado com 100m cada segmento (sem repetidor).</li>
+            <li>Observe o que acontece com o terceiro PC (200m do switch) — conectividade cai.</li>
+            <li>Insira um switch intermediário a 100m e veja a conectividade ser restaurada.</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Laptops a 60m+ perdem associação no AP ou apresentam velocidade reduzida. Para UTP, ao ultrapassar 100m sem repetidor, o link fica inativo. Com switch repetidor a 100m, o link é restaurado. Demonstra na prática os limites de distância de cada meio.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 7 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num a">07</div>
+          <span class="ex-title">Crimpagem e certificação de cabo Cat 5e/6</span>
+          <span class="ex-diff diff-med">MÉDIO</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ Cabo UTP, alicate de crimpagem, conectores RJ-45, testador de cabos</span>
+          <p><strong>Objetivo:</strong> Construir fisicamente um patch cord e um cabo crossover, compreendendo a ordem dos pares na prática.</p>
+          <p><strong>Roteiro — Patch Cord (T568B–T568B):</strong></p>
+          <ol>
+            <li>Corte ~2m de cabo UTP Cat 5e ou 6.</li>
+            <li>Decape 2,5 cm de cada extremidade com o alicate.</li>
+            <li>Organize os fios na ordem T568B: Branco-Laranja, Laranja, Branco-Verde, Azul, Branco-Azul, Verde, Branco-Marrom, Marrom.</li>
+            <li>Insira no conector RJ-45 e crimpe com força.</li>
+            <li>Repita na outra extremidade com a mesma ordem T568B.</li>
+            <li>Teste com o testador de cabos: todos os pinos 1–8 devem acender em sequência.</li>
+          </ol>
+          <p><strong>Cabo Crossover (T568A–T568B):</strong> Na segunda extremidade, use ordem T568A (pares 1–2 e 3–6 trocados).</p>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Testador mostrando todos os 8 LEDs em sequência = cabo OK. Se LED piscar fora de ordem = crimpagem com fio torto. Se LED não acender = fio cortado ou mal inserido. Plugue no PC e switch — link deve subir (LED verde no switch). Crossover: testador mostrará sequência cruzada 1-3, 2-6.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 8 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num a">08</div>
+          <span class="ex-title">Análise comparativa Ethernet vs Wi-Fi com Wireshark</span>
+          <span class="ex-diff diff-med">MÉDIO</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ Wireshark + download de arquivo grande</span>
+          <p><strong>Objetivo:</strong> Comparar a estrutura de frames IEEE 802.3 (Ethernet) e IEEE 802.11 (Wi-Fi) e perceber a diferença de overhead e retransmissões.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Com conexão Ethernet, inicie captura no Wireshark. Baixe um arquivo ISO grande (>100MB) de qualquer repositório Linux.</li>
+            <li>Pare a captura. Vá em Statistics → Summary. Anote: total de pacotes, bytes capturados, % de retransmissões TCP.</li>
+            <li>Repita via Wi-Fi (com alguma distância do AP para gerar interferência).</li>
+            <li>Compare nos dois arquivos .pcap:<br/>– Número de TCP Retransmissions (filter: <code>tcp.analysis.retransmission</code>)<br/>– Número de TCP Duplicate ACKs (filter: <code>tcp.analysis.duplicate_ack</code>)</li>
+            <li>No Wi-Fi, observe frames 802.11 na camada de enlace (Radiotap Header, Signal Strength em dBm).</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Ethernet: retransmissões &lt;0.1%, estrutura de frame limpa. Wi-Fi: retransmissões de 2–10% dependendo do ambiente, headers maiores (802.11 MAC = 24–36 bytes vs Ethernet = 14 bytes). Radiotap mostrará o RSSI em dBm confirmando a qualidade do sinal capturado.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 9 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num a">09</div>
+          <span class="ex-title">Projeto de infraestrutura de rede para escritório</span>
+          <span class="ex-diff diff-hard">AVANÇADO</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ Cisco Packet Tracer + planilha de custos</span>
+          <p><strong>Objetivo:</strong> Projetar a infraestrutura de meios de transmissão para um escritório de 2 andares com 40 usuários, justificando cada escolha de meio.</p>
+          <p><strong>Especificações do projeto:</strong></p>
+          <ul>
+            <li>Andar 1: 20 PCs fixos, 1 sala de servidores, 1 sala de reuniões com TV e notebook.</li>
+            <li>Andar 2: 20 PCs fixos, 10 smartphones/tablets de funcionários, impressoras de rede.</li>
+            <li>Distância entre andares: 30 metros de cabo vertical (backbone).</li>
+            <li>Link de internet: 1 Gbps.</li>
+          </ul>
+          <p><strong>Entregáveis no Packet Tracer:</strong></p>
+          <ol>
+            <li>Topologia completa com: switch de core (L3), switches de acesso por andar, APs, link de fibra entre andares, cabos Cat 6A para pontos fixos.</li>
+            <li>VLANs separadas: VLAN 10 (PCs), VLAN 20 (Wi-Fi), VLAN 30 (Servidores).</li>
+            <li>Configurar o backbone entre andares com fibra (usar interfaces Gig no switch).</li>
+            <li>Documentar: por que fibra no backbone? Por que Cat 6A nos pontos? Por que Wi-Fi 5 nos APs?</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Topologia funcional com ping entre todas as VLANs via roteamento L3. Justificativa técnica: fibra no backbone = imunidade a interferência elétrica e distância; Cat 6A nos drops = 10G future-proof a 100m; Wi-Fi 5/6 para mobilidade. Custo estimado documentado.
+          </div>
+        </div>
+      </div>
+
+      <!-- EX 10 -->
+      <div class="ex-card" onclick="toggle(this)">
+        <div class="ex-header">
+          <div class="ex-num a">10</div>
+          <span class="ex-title">Traceroute e análise de meios na Internet</span>
+          <span class="ex-diff diff-hard">AVANÇADO</span>
+          <span class="ex-arrow">▶</span>
+        </div>
+        <div class="ex-body">
+          <span class="ex-tool">🛠️ CMD / Terminal + WinMTR (Windows) ou mtr (Linux)</span>
+          <p><strong>Objetivo:</strong> Traçar o caminho de pacotes até um servidor remoto, inferir quais meios são utilizados em cada salto e identificar onde estão os gargalos.</p>
+          <p><strong>Roteiro:</strong></p>
+          <ol>
+            <li>Instale WinMTR (Windows) ou use <code>mtr</code> no Linux/Mac.</li>
+            <li>Execute traceroute para servidores em continentes diferentes:</li>
+          </ol>
+          <code class="cmd">tracert 8.8.8.8</code>
+          <code class="cmd">tracert 1.1.1.1</code>
+          <code class="cmd">tracert www.google.co.jp</code>
+          <ol start="3">
+            <li>Para cada salto, anote: IP, hostname (se disponível), RTT. Use ferramentas de geolocalização (ex: ipinfo.io) para localizar cada hop.</li>
+            <li>Identifique saltos onde o RTT salta >20ms — isso pode indicar travessia de cabo submarino.</li>
+            <li>Pesquise os ASNs encontrados (autonomous systems) em bgp.he.net.</li>
+            <li>No WinMTR, execute por 5 minutos e observe a coluna Loss% e StDev (jitter).</li>
+            <li>Monte um mapa do caminho: Minha LAN → ISP → Backbone nacional → Cabo submarino → Destino.</li>
+          </ol>
+          <div class="expected">
+            <strong>✓ RESULTADO ESPERADO</strong>
+            Saltos 1–3: rede local/ISP (~1-5ms, UTP/fibra local). Saltos 4–8: backbone nacional (&lt;20ms, fibra metropolitana). Para Japão: salto com RTT >150ms indica cabo submarino transpacífico. Loss% em hop intermediário não indica problema real (ICMP deprioritizado). StDev alto em Wi-Fi vs baixo em Ethernet confirma jitter do meio sem fio.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /ex-grid -->
+  </div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer>
+  <div>REDES · MEIOS DE TRANSMISSÃO · AULA PRÁTICA COMPLETA</div>
+  <div style="margin-top:.4rem; color:#374151;">PAR TRANÇADO · FIBRA ÓPTICA · COAXIAL · SEM FIO · SATÉLITE</div>
+</footer>
+
+<script>
+function toggle(card) {
+  card.classList.toggle('open');
+}
+
+// Intersection Observer para animações de entrada
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

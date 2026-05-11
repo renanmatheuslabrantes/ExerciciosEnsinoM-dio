@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Builder — Simulador Interativo</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0c0e16;
+      --bg2:       #12141f;
+      --bg3:       #181a28;
+      --surface:   #1d2035;
+      --border:    #2a2d45;
+      --border2:   #353860;
+      --text:      #e2e6ff;
+      --muted:     #6a7099;
+      --green:     #2ecc8a;
+      --green-dim: rgba(46,204,138,.14);
+      --amber:     #f5a623;
+      --amber-dim: rgba(245,166,35,.12);
+      --red:       #ff5370;
+      --red-dim:   rgba(255,83,112,.12);
+      --blue:      #5b8cff;
+      --blue-dim:  rgba(91,140,255,.12);
+      --purple:    #c792ea;
+      --code-bg:   #090b14;
+      --tag:       #89ddff;
+      --attr:      #ffcb6b;
+      --str:       #c3e88d;
+      --cm:        #4a5568;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;overflow:hidden;}
+    body{
+      font-family:'Sora',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar{
+      height:54px;flex-shrink:0;
+      background:var(--bg2);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 20px;gap:16px;
+      position:relative;z-index:50;
+    }
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .app-logo{
+      font-family:'JetBrains Mono',monospace;
+      font-size:14px;font-weight:700;
+      color:var(--text);
+      display:flex;align-items:center;gap:8px;
+    }
+    .app-logo span{
+      background:var(--green);color:#000;
+      padding:2px 7px;border-radius:4px;font-size:11px;
+    }
+    .step-crumb{
+      font-family:'JetBrains Mono',monospace;
+      font-size:11px;color:var(--muted);
+      background:var(--surface);border:1px solid var(--border);
+      padding:4px 12px;border-radius:99px;
+    }
+    .step-crumb b{color:var(--text);}
+
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .xp-bar-wrap{
+      width:160px;height:6px;background:var(--surface);
+      border-radius:99px;overflow:hidden;
+      border:1px solid var(--border);
+    }
+    .xp-bar{
+      height:100%;border-radius:99px;
+      background:linear-gradient(90deg,var(--blue),var(--green));
+      transition:width .5s cubic-bezier(.4,0,.2,1);
+    }
+    .xp-txt{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+    .reset-btn{
+      background:none;border:1px solid var(--border);
+      color:var(--muted);padding:5px 12px;border-radius:7px;
+      font-size:11px;cursor:pointer;font-family:'Sora',sans-serif;
+      transition:all .15s;
+    }
+    .reset-btn:hover{border-color:var(--red);color:var(--red);}
+
+    /* ── MAIN LAYOUT ── */
+    .workspace{
+      flex:1;display:grid;
+      grid-template-columns:320px 1fr 380px;
+      overflow:hidden;
+      min-height:0;
+    }
+
+    /* ── LEFT GUIDE PANEL ── */
+    .guide{
+      border-right:1px solid var(--border);
+      background:var(--bg2);
+      display:flex;flex-direction:column;
+      overflow:hidden;
+    }
+    .guide-body{
+      flex:1;overflow-y:auto;padding:20px;
+      display:flex;flex-direction:column;gap:16px;
+    }
+    .guide-body::-webkit-scrollbar{width:4px;}
+    .guide-body::-webkit-scrollbar-track{background:transparent;}
+    .guide-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+    .step-header{
+      display:flex;align-items:flex-start;gap:12px;
+    }
+    .step-icon{
+      width:40px;height:40px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;flex-shrink:0;
+      background:var(--surface);border:1px solid var(--border);
+    }
+    .step-meta .mod-tag{
+      font-family:'JetBrains Mono',monospace;
+      font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+      color:var(--blue);margin-bottom:3px;
+    }
+    .step-meta h2{font-size:17px;font-weight:800;line-height:1.2;}
+
+    .concept-box{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:10px;padding:14px;
+    }
+    .concept-box .cb-label{
+      font-size:10px;letter-spacing:2px;text-transform:uppercase;
+      color:var(--muted);margin-bottom:8px;
+      font-family:'JetBrains Mono',monospace;
+    }
+    .concept-box p{font-size:13px;line-height:1.7;color:#b8bde8;}
+    .concept-box strong{color:var(--text);}
+    .concept-box code{
+      font-family:'JetBrains Mono',monospace;
+      background:var(--code-bg);border:1px solid var(--border);
+      padding:1px 5px;border-radius:4px;font-size:12px;color:var(--tag);
+    }
+
+    .task-box{
+      background:var(--blue-dim);border:1px solid rgba(91,140,255,.3);
+      border-radius:10px;padding:14px;
+    }
+    .task-box .tb-label{
+      display:flex;align-items:center;gap:6px;
+      font-size:10px;letter-spacing:2px;text-transform:uppercase;
+      color:var(--blue);margin-bottom:8px;
+      font-family:'JetBrains Mono',monospace;
+    }
+    .task-box p{font-size:13px;line-height:1.7;color:var(--text);}
+    .task-box strong{color:var(--blue);}
+
+    .hint-toggle{
+      background:none;border:1px solid var(--border);
+      color:var(--amber);padding:8px 14px;border-radius:8px;
+      font-size:12px;cursor:pointer;font-family:'Sora',sans-serif;
+      display:flex;align-items:center;gap:6px;
+      transition:all .15s;width:100%;
+    }
+    .hint-toggle:hover{border-color:var(--amber);background:var(--amber-dim);}
+    .hint-box{
+      background:var(--amber-dim);border:1px solid rgba(245,166,35,.25);
+      border-radius:10px;padding:14px;display:none;
+    }
+    .hint-box.open{display:block;}
+    .hint-box .hb-label{
+      font-size:10px;letter-spacing:2px;text-transform:uppercase;
+      color:var(--amber);margin-bottom:8px;
+      font-family:'JetBrains Mono',monospace;
+    }
+    .hint-box pre{
+      font-family:'JetBrains Mono',monospace;
+      font-size:12px;line-height:1.7;
+      white-space:pre-wrap;color:#e8d5a3;
+    }
+
+    .validation-area{
+      border-radius:10px;padding:14px;
+      border:1px solid var(--border);
+      background:var(--bg3);
+      min-height:60px;
+      transition:all .3s;
+    }
+    .validation-area.idle{border-color:var(--border);}
+    .validation-area.error{border-color:var(--red);background:var(--red-dim);}
+    .validation-area.success{border-color:var(--green);background:var(--green-dim);}
+    .val-status{
+      display:flex;align-items:center;gap:8px;
+      font-size:12px;font-weight:600;margin-bottom:6px;
+    }
+    .val-status .dot{
+      width:8px;height:8px;border-radius:50%;flex-shrink:0;
+    }
+    .idle .val-status .dot{background:var(--muted);}
+    .error .val-status .dot{background:var(--red);}
+    .success .val-status .dot{background:var(--green);}
+    .idle .val-status span{color:var(--muted);}
+    .error .val-status span{color:var(--red);}
+    .success .val-status span{color:var(--green);}
+    .val-msg{font-size:12px;line-height:1.6;color:#b8bde8;}
+
+    .check-btn{
+      width:100%;padding:12px;border-radius:10px;
+      background:var(--blue);border:none;color:#fff;
+      font-size:14px;font-weight:700;cursor:pointer;
+      font-family:'Sora',sans-serif;
+      transition:all .15s;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .check-btn:hover{background:#4a7bef;transform:translateY(-1px);}
+    .check-btn:active{transform:translateY(0);}
+
+    .next-btn{
+      width:100%;padding:12px;border-radius:10px;
+      background:var(--green);border:none;color:#000;
+      font-size:14px;font-weight:800;cursor:pointer;
+      font-family:'Sora',sans-serif;
+      transition:all .15s;display:none;
+      display:none;align-items:center;justify-content:center;gap:8px;
+    }
+    .next-btn:hover{background:#25b87a;transform:translateY(-1px);}
+    .next-btn.visible{display:flex;}
+
+    /* steps progress dots */
+    .steps-dots{
+      display:flex;gap:5px;align-items:center;flex-wrap:wrap;
+      padding:12px 20px;border-top:1px solid var(--border);
+      background:var(--bg);
+    }
+    .sdot{
+      width:9px;height:9px;border-radius:50%;
+      background:var(--surface);border:1px solid var(--border);
+      transition:all .3s;cursor:pointer;
+    }
+    .sdot.done{background:var(--green);border-color:var(--green);}
+    .sdot.active{background:var(--blue);border-color:var(--blue);transform:scale(1.3);}
+
+    /* ── CODE EDITOR ── */
+    .editor-panel{
+      display:flex;flex-direction:column;
+      border-right:1px solid var(--border);
+      background:var(--code-bg);
+    }
+    .editor-topbar{
+      height:38px;flex-shrink:0;
+      background:var(--bg3);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 16px;
+    }
+    .editor-topbar .filename{
+      font-family:'JetBrains Mono',monospace;
+      font-size:12px;color:var(--muted);
+      display:flex;align-items:center;gap:8px;
+    }
+    .editor-topbar .filename .dot-red{width:10px;height:10px;border-radius:50%;background:#ff5f57;}
+    .editor-topbar .filename .dot-yellow{width:10px;height:10px;border-radius:50%;background:#febc2e;}
+    .editor-topbar .filename .dot-green{width:10px;height:10px;border-radius:50%;background:#28c840;}
+
+    .editor-wrap{
+      flex:1;display:flex;overflow:hidden;
+      position:relative;
+    }
+    .line-numbers{
+      padding:16px 0 16px 12px;
+      font-family:'JetBrains Mono',monospace;
+      font-size:13px;line-height:1.7;
+      color:var(--cm);text-align:right;
+      user-select:none;min-width:40px;
+      background:var(--code-bg);
+      white-space:pre;overflow:hidden;
+      border-right:1px solid var(--border);
+    }
+    #codeEditor{
+      flex:1;padding:16px 16px 16px 14px;
+      font-family:'JetBrains Mono',monospace;
+      font-size:13px;line-height:1.7;
+      background:var(--code-bg);
+      color:var(--text);border:none;outline:none;
+      resize:none;tab-size:2;
+      caret-color:var(--green);
+      overflow-y:auto;
+    }
+    #codeEditor::-webkit-scrollbar{width:5px;}
+    #codeEditor::-webkit-scrollbar-track{background:transparent;}
+    #codeEditor::-webkit-scrollbar-thumb{background:var(--border2);}
+
+    /* ── PREVIEW PANEL ── */
+    .preview-panel{
+      display:flex;flex-direction:column;
+      background:var(--bg2);
+    }
+    .preview-topbar{
+      height:38px;flex-shrink:0;
+      background:var(--bg3);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 16px;
+    }
+    .preview-topbar .pt-label{
+      font-family:'JetBrains Mono',monospace;
+      font-size:11px;color:var(--muted);
+      display:flex;align-items:center;gap:6px;
+    }
+    .live-dot{
+      width:7px;height:7px;border-radius:50%;
+      background:var(--green);animation:blink 2s ease-in-out infinite;
+    }
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+    .url-bar{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:6px;padding:3px 10px;
+      font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+      display:flex;align-items:center;gap:6px;
+    }
+    .url-bar span{color:var(--green);}
+
+    #previewFrame{
+      flex:1;border:none;background:#fff;
+    }
+    .preview-empty{
+      flex:1;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:12px;
+      color:var(--muted);
+    }
+    .preview-empty .pe-icon{font-size:40px;opacity:.3;}
+    .preview-empty p{font-size:13px;}
+
+    /* ── CELEBRATION ── */
+    .celebration{
+      position:fixed;inset:0;z-index:1000;
+      background:rgba(9,11,20,.95);
+      display:none;align-items:center;justify-content:center;
+      flex-direction:column;gap:20px;
+    }
+    .celebration.show{display:flex;}
+    .cel-card{
+      background:var(--bg3);border:1px solid var(--border2);
+      border-radius:20px;padding:48px;text-align:center;
+      max-width:500px;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+    }
+    @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+    .cel-emoji{font-size:64px;margin-bottom:12px;}
+    .cel-card h2{
+      font-family:'Sora',sans-serif;font-size:28px;font-weight:800;
+      background:linear-gradient(135deg,var(--green),var(--blue));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      margin-bottom:8px;
+    }
+    .cel-card p{font-size:15px;color:#b8bde8;line-height:1.7;margin-bottom:24px;}
+    .cel-btn{
+      background:linear-gradient(135deg,var(--green),var(--blue));
+      border:none;color:#000;padding:14px 32px;border-radius:12px;
+      font-size:15px;font-weight:800;cursor:pointer;font-family:'Sora',sans-serif;
+      transition:opacity .15s;
+    }
+    .cel-btn:hover{opacity:.9;}
+    .confetti-dot{
+      position:absolute;border-radius:2px;
+      animation:fall linear forwards;
+    }
+    @keyframes fall{
+      from{transform:translateY(-20px) rotate(0deg);opacity:1;}
+      to{transform:translateY(110vh) rotate(720deg);opacity:0;}
+    }
+
+    /* ── SOLUTION MODAL ── */
+    .sol-modal{
+      position:fixed;inset:0;z-index:500;
+      background:rgba(9,11,20,.8);backdrop-filter:blur(4px);
+      display:none;align-items:center;justify-content:center;
+    }
+    .sol-modal.open{display:flex;}
+    .sol-card{
+      background:var(--bg3);border:1px solid var(--border2);
+      border-radius:16px;padding:28px;max-width:580px;width:90%;
+      animation:popIn .3s ease;
+    }
+    .sol-card h3{font-size:18px;font-weight:800;margin-bottom:4px;color:var(--amber);}
+    .sol-card .warn{font-size:12px;color:var(--muted);margin-bottom:16px;}
+    .sol-card pre{
+      background:var(--code-bg);border:1px solid var(--border);
+      border-radius:8px;padding:16px;
+      font-family:'JetBrains Mono',monospace;font-size:12px;
+      line-height:1.7;color:#c3e88d;overflow-x:auto;max-height:320px;overflow-y:auto;
+      white-space:pre-wrap;
+    }
+    .sol-actions{display:flex;gap:10px;margin-top:16px;}
+    .sol-use-btn{
+      flex:1;padding:10px;border-radius:8px;
+      background:var(--amber);border:none;color:#000;
+      font-size:13px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;
+    }
+    .sol-close-btn{
+      flex:1;padding:10px;border-radius:8px;
+      background:none;border:1px solid var(--border);color:var(--text);
+      font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;
+    }
+
+    /* scrollbar global */
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="app-logo">⚡ HTML Builder <span>SIMULADOR</span></div>
+    <div class="step-crumb" id="stepCrumb">Passo <b>1</b> de 11</div>
+  </div>
+  <div class="topbar-right">
+    <div class="xp-txt" id="xpTxt">XP: 0 / 1100</div>
+    <div class="xp-bar-wrap"><div class="xp-bar" id="xpBar" style="width:0%"></div></div>
+    <button class="reset-btn" onclick="confirmReset()">↺ Reiniciar</button>
+  </div>
+</header>
+
+<!-- MAIN WORKSPACE -->
+<div class="workspace">
+
+  <!-- LEFT: GUIDE -->
+  <aside class="guide">
+    <div class="guide-body" id="guideBody">
+
+      <div class="step-header">
+        <div class="step-icon" id="stepIcon">🏗</div>
+        <div class="step-meta">
+          <div class="mod-tag" id="stepModule">MÓDULO 1 — ESTRUTURA</div>
+          <h2 id="stepTitle">Carregando...</h2>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="cb-label">📖 Conceito</div>
+        <p id="stepConcept"></p>
+      </div>
+
+      <div class="task-box">
+        <div class="tb-label">🎯 Sua Tarefa</div>
+        <p id="stepTask"></p>
+      </div>
+
+      <button class="hint-toggle" id="hintToggle" onclick="toggleHint()">
+        💡 Ver dica de código
+      </button>
+      <div class="hint-box" id="hintBox">
+        <div class="hb-label" id="hintLabel">⚠️ Leia com atenção — a dica some ao fechar!</div>
+        <pre id="hintCode"
+          oncopy="return false"
+          oncut="return false"
+          oncontextmenu="return false"
+          style="user-select:none;-webkit-user-select:none;"
+        ></pre>
+      </div>
+
+      <button class="hint-toggle" id="solBtn"
+              style="color:var(--purple);border-color:var(--purple);display:none"
+              onclick="showSolution()">
+        👁 Ver solução completa
+      </button>
+
+      <div class="validation-area idle" id="validationArea">
+        <div class="val-status">
+          <div class="dot"></div>
+          <span id="valStatusText">Aguardando sua resposta...</span>
+        </div>
+        <div class="val-msg" id="valMsg">Digite seu código no editor e clique em Verificar.</div>
+      </div>
+
+      <button class="check-btn" onclick="checkCode()" id="checkBtn">
+        ✓ Verificar Código
+      </button>
+      <button class="next-btn" id="nextBtn" onclick="nextStep()">
+        Próximo Passo →
+      </button>
+
+    </div>
+    <div class="steps-dots" id="stepsDots"></div>
+  </aside>
+
+  <!-- CENTER: CODE EDITOR -->
+  <div class="editor-panel">
+    <div class="editor-topbar">
+      <div class="filename">
+        <span class="dot-red"></span>
+        <span class="dot-yellow"></span>
+        <span class="dot-green"></span>
+        &nbsp; index.html
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">
+        Tab = 2 espaços
+      </div>
+    </div>
+    <div class="editor-wrap">
+      <div class="line-numbers" id="lineNumbers">1</div>
+      <textarea
+        id="codeEditor"
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        placeholder="// Seu código HTML aqui..."
+        oninput="onEditorInput()"
+        onkeydown="handleTab(event)"
+        onscroll="syncScroll()"
+      ></textarea>
+    </div>
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="preview-panel">
+    <div class="preview-topbar">
+      <div class="pt-label">
+        <div class="live-dot"></div>
+        Preview ao vivo
+      </div>
+      <div class="url-bar">
+        <span>📄</span> index.html
+      </div>
+    </div>
+    <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+
+</div>
+
+<!-- CELEBRATION MODAL -->
+<div class="celebration" id="celebration">
+  <div class="cel-card">
+    <div class="cel-emoji">🎉</div>
+    <h2>Site completo!</h2>
+    <p>Parabéns! Você construiu uma página HTML completa do zero, aprendendo estrutura, semântica, formulários e imagens.<br><br>
+    Continue praticando com <strong>CSS</strong> para estilizar e <strong>JavaScript</strong> para adicionar interatividade!</p>
+    <button class="cel-btn" onclick="restartAll()">🚀 Fazer novamente</button>
+  </div>
+</div>
+
+<!-- SOLUTION MODAL -->
+<div class="sol-modal" id="solModal">
+  <div class="sol-card">
+    <h3>💡 Solução</h3>
+    <div class="warn">⚠️ Tente resolver sozinho primeiro! Olhar a solução vai funcionar, mas você aprende muito mais errando.</div>
+    <pre id="solCode"></pre>
+    <div class="sol-actions">
+      <button class="sol-use-btn" onclick="useSolution()">Usar esta solução no editor</button>
+      <button class="sol-close-btn" onclick="closeSolution()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// STEPS DATA
+// ─────────────────────────────────────────────
+// boilerplate que já vem preenchido em todos os passos
+const BASE = `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Document</title>\n</head>\n<body>\n    \n</body>\n</html>`;
+
+const steps = [
+  // ── PASSO 1 ──────────────────────────────────────────────
+  {
+    id: 1,
+    module: 'MÓDULO 1 — TÍTULO DA PÁGINA',
+    icon: '🏷',
+    title: 'Alterando o &lt;title&gt;',
+    concept: `O <code>&lt;title&gt;</code> define o nome que aparece na <strong>aba do navegador</strong> e nos resultados do Google. Por padrão seu editor criou <code>Document</code> — um título genérico que não diz nada. Todo site profissional tem um título descritivo.`,
+    task: `No <code>&lt;head&gt;</code>, localize <code>&lt;title&gt;Document&lt;/title&gt;</code> e troque <strong>Document</strong> pelo nome do seu site. Use qualquer nome que quiser!`,
+    hint: `<___>Meu Site Incrível</___>`,
+    starter: BASE,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    \n</body>\n</html>`,
+    validate(code) {
+      return /<title>(?!Document\s*<)(?!document\s*<).+<\/title>/i.test(code);
+    },
+    successMsg: `✅ Título atualizado! Olhe a aba do preview — o nome mudou. Simples assim!`,
+    errorMsg: `Troque o texto "Document" dentro de <title>...</title> por qualquer outro nome.`,
+  },
+
+  // ── PASSO 2 ──────────────────────────────────────────────
+  {
+    id: 2,
+    module: 'MÓDULO 1 — CONTEÚDO NO BODY',
+    icon: '✏️',
+    title: 'Seu primeiro &lt;h1&gt; e &lt;p&gt;',
+    concept: `O <code>&lt;body&gt;</code> já existe no seu código — é nele que vai <strong>tudo que o usuário vê</strong>. O <code>&lt;h1&gt;</code> é o título principal da página (maior relevância para o Google). O <code>&lt;p&gt;</code> cria um parágrafo de texto. Esses dois são os blocos mais básicos de qualquer conteúdo.`,
+    task: `Dentro do <code>&lt;body&gt;</code>, adicione um <strong>&lt;h1&gt;</strong> com o título do site e um <strong>&lt;p&gt;</strong> com uma frase de apresentação.`,
+    hint: `<body>\n    <___>Bem-vindo ao Meu Site!</___>\n    <___>Aqui você vai aprender HTML do zero.</___>\n</body>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    \n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <h1>Bem-vindo ao Meu Site!</h1>\n    <p>Aqui você vai aprender HTML do zero.</p>\n</body>\n</html>`,
+    validate(code) {
+      return /<h1>[^<]+<\/h1>/i.test(code) && /<p>[^<]+<\/p>/i.test(code);
+    },
+    successMsg: `✅ Primeiro conteúdo no ar! Veja no preview o título grande e o parágrafo. Essa é a base de toda página.`,
+    errorMsg: `Adicione <h1>Seu título</h1> e <p>Seu parágrafo de texto.</p> dentro do <body>.`,
+  },
+
+  // ── PASSO 3 ──────────────────────────────────────────────
+  {
+    id: 3,
+    module: 'MÓDULO 2 — SEMÂNTICA',
+    icon: '🧩',
+    title: 'Cabeçalho semântico: &lt;header&gt;',
+    concept: `Tags semânticas <strong>descrevem o significado</strong> do conteúdo, não apenas a aparência. O <code>&lt;header&gt;</code> diz ao navegador, ao Google e aos leitores de tela: <em>"isso aqui é o cabeçalho"</em>. É diferente do <code>&lt;head&gt;</code> (invisível, metadados) — o <code>&lt;header&gt;</code> é visível e fica sempre dentro do <code>&lt;body&gt;</code>.`,
+    task: `Envolva o seu <code>&lt;h1&gt;</code> e o <code>&lt;p&gt;</code> dentro de uma tag <strong>&lt;header&gt;</strong>.`,
+    hint: `<______>\n    <h1>Bem-vindo ao Meu Site!</h1>\n    <p>Aqui você vai aprender HTML do zero.</p>\n</______>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <h1>Bem-vindo ao Meu Site!</h1>\n    <p>Aqui você vai aprender HTML do zero.</p>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n    </header>\n</body>\n</html>`,
+    validate(code) {
+      return /<header>/i.test(code) && /<\/header>/i.test(code) && /<h1>/i.test(code);
+    },
+    successMsg: `✅ Semântica aplicada! O código agora comunica intenção. O visual é o mesmo, mas o significado é muito maior.`,
+    errorMsg: `Envolva o <h1> e o <p> com <header>...</header>. A indentação ajuda a ler, mas não é obrigatória.`,
+  },
+
+  // ── PASSO 4 ──────────────────────────────────────────────
+  {
+    id: 4,
+    module: 'MÓDULO 2 — SEMÂNTICA',
+    icon: '🗺',
+    title: 'Menu de navegação: &lt;nav&gt;',
+    concept: `A tag <code>&lt;nav&gt;</code> marca os <strong>links de navegação principal</strong> do site. Tecnologias assistivas pulam direto para o <code>&lt;nav&gt;</code> quando o usuário quer ir a outra página. Cada link é criado com <code>&lt;a href="destino"&gt;Texto&lt;/a&gt;</code> — o atributo <code>href</code> define para onde o link leva.`,
+    task: `Dentro do <code>&lt;header&gt;</code>, após o parágrafo, adicione uma tag <strong>&lt;nav&gt;</strong> com <strong>3 links</strong>: Início (<code>href="/"</code>), Sobre (<code>href="/sobre"</code>) e Contato (<code>href="/contato"</code>).`,
+    hint: `<___>\n    <a ____="/">Início</a>\n    <a ____="/sobre">Sobre</a>\n    <a ____="/contato">Contato</a>\n</___>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n    </header>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n</body>\n</html>`,
+    validate(code) {
+      return /<nav>/i.test(code) && /<\/nav>/i.test(code) &&
+             (code.match(/<a\s+href/gi)||[]).length >= 3;
+    },
+    successMsg: `✅ Menu criado! Veja os links aparecerem no preview. Com CSS eles virariam um menu bonito.`,
+    errorMsg: `Adicione <nav> dentro do <header> com pelo menos 3 tags <a href="...">Texto</a> dentro.`,
+  },
+
+  // ── PASSO 5 ──────────────────────────────────────────────
+  {
+    id: 5,
+    module: 'MÓDULO 2 — SEMÂNTICA',
+    icon: '📄',
+    title: 'Conteúdo principal: &lt;main&gt;',
+    concept: `O <code>&lt;main&gt;</code> marca o <strong>conteúdo central e único</strong> da página — só pode haver UM por documento. É o "miolo" da página, o que diferencia esta página de todas as outras do site. Deve ficar fora do <code>&lt;header&gt;</code> e do <code>&lt;footer&gt;</code>.`,
+    task: `Após o <code>&lt;/header&gt;</code>, adicione uma tag <strong>&lt;main&gt;</strong> com um <strong>&lt;h2&gt;</strong> e um <strong>&lt;p&gt;</strong> de conteúdo dentro.`,
+    hint: `<____>\n    <h2>Sobre Mim</h2>\n    <p>Olá! Sou estudante de HTML.</p>\n</____>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <h2>Sobre Mim</h2>\n        <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n    </main>\n</body>\n</html>`,
+    validate(code) {
+      return /<main>/i.test(code) && /<\/main>/i.test(code) && /<h2>/i.test(code);
+    },
+    successMsg: `✅ Main adicionado! A hierarquia de títulos h1 → h2 está correta. O Google adora isso.`,
+    errorMsg: `Adicione <main>...</main> após o </header>. Dentro do main, coloque um <h2> e um <p>.`,
+  },
+
+  // ── PASSO 6 ──────────────────────────────────────────────
+  {
+    id: 6,
+    module: 'MÓDULO 2 — SEMÂNTICA',
+    icon: '📦',
+    title: 'Agrupando com &lt;section&gt;',
+    concept: `A tag <code>&lt;section&gt;</code> agrupa <strong>conteúdo relacionado tematicamente</strong>. Uma boa regra: se o grupo de conteúdo teria um título próprio, use <code>&lt;section&gt;</code>. Você pode ter múltiplas sections dentro do <code>&lt;main&gt;</code>, cada uma com seu próprio <code>&lt;h2&gt;</code>.`,
+    task: `Envolva o <code>&lt;h2&gt;</code> e o <code>&lt;p&gt;</code> que estão dentro do <code>&lt;main&gt;</code> em uma <strong>&lt;section&gt;</strong>. Depois adicione uma <strong>segunda &lt;section&gt;</strong> com outro <code>&lt;h2&gt;</code> e <code>&lt;p&gt;</code> de tema diferente (ex: "Minhas Habilidades").`,
+    hint: `<main>\n    <_______>\n        <h2>Sobre Mim</h2>\n        <p>Olá! Sou estudante de HTML.</p>\n    </_______>\n    <_______>\n        <h2>Minhas ___________</h2>\n        <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n    </_______>\n</main>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <h2>Sobre Mim</h2>\n        <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n    </main>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n    </main>\n</body>\n</html>`,
+    validate(code) {
+      return (code.match(/<section>/gi)||[]).length >= 2 && (code.match(/<h2>/gi)||[]).length >= 2;
+    },
+    successMsg: `✅ Duas sections! Agora o conteúdo está bem organizado em blocos temáticos distintos.`,
+    errorMsg: `Envolva o conteúdo do main em <section>...</section>. Crie uma segunda <section> com outro <h2> e <p>.`,
+  },
+
+  // ── PASSO 7 ──────────────────────────────────────────────
+  {
+    id: 7,
+    module: 'MÓDULO 2 — SEMÂNTICA',
+    icon: '🦶',
+    title: 'Rodapé: &lt;footer&gt;',
+    concept: `O <code>&lt;footer&gt;</code> é o rodapé semântico — fica sempre após o <code>&lt;/main&gt;</code> e antes do <code>&lt;/body&gt;</code>. Contém copyright, links legais e informações de contato. Use a entidade <code>&amp;copy;</code> para gerar o símbolo © — ela funciona em todos os navegadores e sistemas.`,
+    task: `Após o <code>&lt;/main&gt;</code>, adicione um <strong>&lt;footer&gt;</strong> com um <code>&lt;p&gt;</code> de copyright usando <code>&amp;copy;</code> e o ano atual.`,
+    hint: `<______>\n    <p>&____; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n</______>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n    </main>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    validate(code) {
+      return /<footer>/i.test(code) && /<\/footer>/i.test(code) && /&copy;/i.test(code);
+    },
+    successMsg: `✅ Estrutura semântica 100% completa: header → main (sections) → footer. Isso é HTML profissional!`,
+    errorMsg: `Adicione <footer>...</footer> após </main>. Dentro coloque <p>&copy; 2025 ...</p>.`,
+  },
+
+  // ── PASSO 8 ──────────────────────────────────────────────
+  {
+    id: 8,
+    module: 'MÓDULO 3 — FORMULÁRIOS',
+    icon: '📝',
+    title: 'Criando um &lt;form&gt;',
+    concept: `A tag <code>&lt;form&gt;</code> é o contêiner de todo formulário. O atributo <code>action</code> define para onde os dados vão (URL do servidor) e o <code>method</code> define como: <strong>GET</strong> envia os dados na URL (visível), <strong>POST</strong> envia no corpo da requisição (oculto — use para senhas e dados sensíveis).`,
+    task: `Adicione uma <strong>terceira &lt;section&gt;</strong> dentro do <code>&lt;main&gt;</code> com <code>&lt;h2&gt;Contato&lt;/h2&gt;</code> e um <strong>&lt;form&gt;</strong> com <code>action="/contato"</code> e <code>method="POST"</code> dentro. O form pode ficar vazio por enquanto.`,
+    hint: `<section>\n    <h2>Contato</h2>\n    <____ ______="/contato" ______="____">\n    </____>\n</section>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n        <section>\n            <h2>Contato</h2>\n            <form action="/contato" method="POST">\n            </form>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    validate(code) {
+      return /<form[^>]+action[^>]+method/i.test(code) && /<\/form>/i.test(code);
+    },
+    successMsg: `✅ Form criado! Agora vamos popular esse formulário com campos de entrada.`,
+    errorMsg: `Crie uma nova <section> no main com <h2>Contato</h2> e <form action="/contato" method="POST"></form>.`,
+  },
+
+  // ── PASSO 9 ──────────────────────────────────────────────
+  {
+    id: 9,
+    module: 'MÓDULO 3 — FORMULÁRIOS',
+    icon: '🔤',
+    title: '&lt;label&gt; e &lt;input&gt;',
+    concept: `O <code>&lt;label&gt;</code> é o texto do campo — deve sempre estar associado ao seu <code>&lt;input&gt;</code> pelo par <code>for</code>/<code>id</code>. Isso permite <strong>clicar no texto para focar o campo</strong> e é lido por leitores de tela. Sem label, deficientes visuais não sabem o que digitar. O <code>type</code> do input define o comportamento: <code>text</code>, <code>email</code>, <code>password</code>, <code>number</code>...`,
+    task: `Dentro do <code>&lt;form&gt;</code>, adicione dois pares de <strong>&lt;label&gt;</strong> + <strong>&lt;input&gt;</strong>: um para nome (<code>type="text"</code>) e um para e-mail (<code>type="email"</code>). Lembre-se: o <code>for</code> do label deve bater com o <code>id</code> do input!`,
+    hint: `<label ___="nome">Seu Nome:</label>\n<input type="____" ___="nome" name="nome" required>\n\n<label ___="email">E-mail:</label>\n<input type="_____" ___="email" name="email" required>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n        <section>\n            <h2>Contato</h2>\n            <form action="/contato" method="POST">\n            </form>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n        <section>\n            <h2>Contato</h2>\n            <form action="/contato" method="POST">\n                <label for="nome">Seu Nome:</label>\n                <input type="text" id="nome" name="nome" placeholder="João Silva" required>\n                <label for="email">E-mail:</label>\n                <input type="email" id="email" name="email" placeholder="joao@email.com" required>\n            </form>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    validate(code) {
+      return (code.match(/<label/gi)||[]).length >= 2 &&
+             (code.match(/<input/gi)||[]).length >= 2 &&
+             /for\s*=\s*["'][^"']+["']/i.test(code);
+    },
+    successMsg: `✅ Campos criados! No preview você pode clicar nos labels e ver o campo focar. Experimente!`,
+    errorMsg: `Crie 2 pares label+input. O atributo for do label deve ser igual ao id do input correspondente.`,
+  },
+
+  // ── PASSO 10 ──────────────────────────────────────────────
+  {
+    id: 10,
+    module: 'MÓDULO 3 — FORMULÁRIOS',
+    icon: '💬',
+    title: '&lt;textarea&gt; e &lt;button&gt;',
+    concept: `O <code>&lt;textarea&gt;</code> permite textos longos com múltiplas linhas — ideal para mensagens e comentários. Diferente do <code>&lt;input&gt;</code>, ele tem tag de fechamento. O atributo <code>rows</code> define a altura inicial. Por fim, todo formulário precisa de um <code>&lt;button type="submit"&gt;</code> para enviar.`,
+    task: `Dentro do <code>&lt;form&gt;</code>, após os inputs, adicione um <strong>&lt;label&gt;</strong> + <strong>&lt;textarea&gt;</strong> para mensagem (com <code>rows="4"</code>) e um <strong>&lt;button type="submit"&gt;</strong> para enviar.`,
+    hint: `<label ___="mensagem">Mensagem:</label>\n<________ ___="mensagem" name="mensagem" ____="4" placeholder="..."></________>\n\n<button type="______">Enviar Mensagem</button>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n        <section>\n            <h2>Contato</h2>\n            <form action="/contato" method="POST">\n                <label for="nome">Seu Nome:</label>\n                <input type="text" id="nome" name="nome" placeholder="João Silva" required>\n                <label for="email">E-mail:</label>\n                <input type="email" id="email" name="email" placeholder="joao@email.com" required>\n            </form>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n        <section>\n            <h2>Contato</h2>\n            <form action="/contato" method="POST">\n                <label for="nome">Seu Nome:</label>\n                <input type="text" id="nome" name="nome" placeholder="João Silva" required>\n                <label for="email">E-mail:</label>\n                <input type="email" id="email" name="email" placeholder="joao@email.com" required>\n                <label for="mensagem">Mensagem:</label>\n                <textarea id="mensagem" name="mensagem" rows="4" placeholder="Digite sua mensagem..."></textarea>\n                <button type="submit">Enviar Mensagem</button>\n            </form>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    validate(code) {
+      return /<textarea/i.test(code) && /<\/textarea>/i.test(code) &&
+             /<button[^>]+type\s*=\s*["']submit["']/i.test(code);
+    },
+    successMsg: `✅ Formulário completo! Agora o usuário pode escrever uma mensagem e enviar. Experimente no preview!`,
+    errorMsg: `Adicione: <textarea id="mensagem" rows="4">...</textarea> e <button type="submit">Enviar</button>.`,
+  },
+
+  // ── PASSO 11 ──────────────────────────────────────────────
+  {
+    id: 11,
+    module: 'MÓDULO 4 — MULTIMÍDIA',
+    icon: '🖼',
+    title: 'Adicionando uma imagem: &lt;img&gt;',
+    concept: `A tag <code>&lt;img&gt;</code> é <strong>void</strong> (auto-fechada, sem conteúdo). O atributo <code>src</code> aponta para o arquivo ou URL. O <code>alt</code> é <strong>obrigatório</strong> — é o texto alternativo para leitores de tela e quando a imagem não carrega. O <code>loading="lazy"</code> melhora a performance: a imagem só carrega quando o usuário rola até ela.`,
+    task: `Na section "Sobre Mim", após o parágrafo, adicione uma <strong>&lt;img&gt;</strong> com <code>src</code> apontando para <code>https://picsum.photos/600/250</code>, um <code>alt</code> descritivo, <code>width="600"</code> e <code>loading="lazy"</code>.`,
+    hint: `<___\n    ___="https://picsum.photos/600/250"\n    ___="Foto de destaque da seção sobre mim"\n    width="600"\n    _______="____"\n>`,
+    starter: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n        <section>\n            <h2>Contato</h2>\n            <form action="/contato" method="POST">\n                <label for="nome">Seu Nome:</label>\n                <input type="text" id="nome" name="nome" placeholder="João Silva" required>\n                <label for="email">E-mail:</label>\n                <input type="email" id="email" name="email" placeholder="joao@email.com" required>\n                <label for="mensagem">Mensagem:</label>\n                <textarea id="mensagem" name="mensagem" rows="4" placeholder="Digite sua mensagem..."></textarea>\n                <button type="submit">Enviar Mensagem</button>\n            </form>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    solution: `<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu Site Incrível</title>\n</head>\n<body>\n    <header>\n        <h1>Bem-vindo ao Meu Site!</h1>\n        <p>Aqui você vai aprender HTML do zero.</p>\n        <nav>\n            <a href="/">Início</a>\n            <a href="/sobre">Sobre</a>\n            <a href="/contato">Contato</a>\n        </nav>\n    </header>\n    <main>\n        <section>\n            <h2>Sobre Mim</h2>\n            <img\n                src="https://picsum.photos/600/250"\n                alt="Foto de destaque da seção sobre mim"\n                width="600"\n                height="250"\n                loading="lazy"\n            >\n            <p>Olá! Sou estudante de HTML e estou construindo minha primeira página.</p>\n        </section>\n        <section>\n            <h2>Minhas Habilidades</h2>\n            <p>Estou aprendendo HTML, CSS e JavaScript.</p>\n        </section>\n        <section>\n            <h2>Contato</h2>\n            <form action="/contato" method="POST">\n                <label for="nome">Seu Nome:</label>\n                <input type="text" id="nome" name="nome" placeholder="João Silva" required>\n                <label for="email">E-mail:</label>\n                <input type="email" id="email" name="email" placeholder="joao@email.com" required>\n                <label for="mensagem">Mensagem:</label>\n                <textarea id="mensagem" name="mensagem" rows="4" placeholder="Digite sua mensagem..."></textarea>\n                <button type="submit">Enviar Mensagem</button>\n            </form>\n        </section>\n    </main>\n    <footer>\n        <p>&copy; 2025 Meu Site Incrível. Todos os direitos reservados.</p>\n    </footer>\n</body>\n</html>`,
+    validate(code) {
+      return /<img/i.test(code) && /alt\s*=\s*["'][^"']+["']/i.test(code) &&
+             /src\s*=/i.test(code) && /loading\s*=\s*["']lazy["']/i.test(code);
+    },
+    successMsg: `🎉 INCRÍVEL! Sua página está completa com imagem! Você construiu um site real do zero partindo do boilerplate!`,
+    errorMsg: `Adicione <img src="https://picsum.photos/600/250" alt="Descrição" width="600" loading="lazy"> dentro da section "Sobre Mim".`,
+    isLast: true,
+  }
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentStep = 0;
+let completedSteps = new Set();
+let xp = 0;
+let hintUsed = false;
+const XP_PER_STEP = 100;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function init() {
+  buildDots();
+  loadStep(0);
+}
+
+function buildDots() {
+  const container = document.getElementById('stepsDots');
+  container.innerHTML = '';
+  steps.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'sdot' + (i === 0 ? ' active' : '');
+    d.title = s.title;
+    d.onclick = () => jumpTo(i);
+    container.appendChild(d);
+  });
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll('.sdot');
+  dots.forEach((d, i) => {
+    d.className = 'sdot';
+    if (completedSteps.has(i)) d.classList.add('done');
+    if (i === currentStep) d.classList.add('active');
+  });
+}
+
+// ─────────────────────────────────────────────
+// LOAD STEP
+// ─────────────────────────────────────────────
+function loadStep(idx) {
+  if (idx >= steps.length) return;
+  currentStep = idx;
+  const s = steps[idx];
+
+  // update guide
+  document.getElementById('stepIcon').textContent = s.icon;
+  document.getElementById('stepModule').textContent = s.module;
+  document.getElementById('stepTitle').innerHTML = s.title;
+  document.getElementById('stepConcept').innerHTML = s.concept;
+  document.getElementById('stepTask').innerHTML = s.task;
+  document.getElementById('hintCode').textContent = s.hint;
+  document.getElementById('hintBox').classList.remove('open');
+  document.getElementById('hintToggle').textContent = '💡 Ver dica de código';
+
+  // crumb
+  document.getElementById('stepCrumb').innerHTML =
+    `Passo <b>${idx + 1}</b> de ${steps.length}`;
+
+  // editor
+  const editor = document.getElementById('codeEditor');
+  // preserve code if going back to completed step
+  editor.value = s.starter;
+  updateLineNumbers();
+  updatePreview();
+
+  // reset validation
+  setValidation('idle', 'Aguardando sua resposta...', 'Digite seu código no editor e clique em Verificar.');
+
+  // reset hint — only once per step
+  hintUsed = false;
+  const hintBtn = document.getElementById('hintToggle');
+  const hintBox2 = document.getElementById('hintBox');
+  hintBox2.classList.remove('open');
+  hintBtn.disabled = false;
+  hintBtn.style.opacity = '1';
+  hintBtn.style.cursor = 'pointer';
+  hintBtn.textContent = '💡 Ver dica de código';
+  document.getElementById('hintLabel').textContent = '⚠️ Leia com atenção — a dica some ao fechar!';
+
+  // solution button: only visible on last step
+  document.getElementById('solBtn').style.display = s.isLast ? 'flex' : 'none';
+
+  // buttons
+  document.getElementById('nextBtn').classList.remove('visible');
+
+  updateDots();
+}
+
+// ─────────────────────────────────────────────
+// EDITOR
+// ─────────────────────────────────────────────
+let previewTimer = null;
+function onEditorInput() {
+  updateLineNumbers();
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(updatePreview, 600);
+}
+
+function handleTab(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = start + 2;
+    onEditorInput();
+  }
+}
+
+function syncScroll() {
+  const ta = document.getElementById('codeEditor');
+  const ln = document.getElementById('lineNumbers');
+  ln.scrollTop = ta.scrollTop;
+}
+
+function updateLineNumbers() {
+  const ta = document.getElementById('codeEditor');
+  const ln = document.getElementById('lineNumbers');
+  const lines = ta.value.split('\n').length;
+  ln.textContent = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+}
+
+function updatePreview() {
+  const code = document.getElementById('codeEditor').value;
+  const frame = document.getElementById('previewFrame');
+  frame.srcdoc = code || `<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#999;font-size:14px;margin:0;background:#fafafa"><p>O preview aparecerá aqui conforme você digitar...</p></body></html>`;
+}
+
+// ─────────────────────────────────────────────
+// VALIDATION
+// ─────────────────────────────────────────────
+function setValidation(state, status, msg) {
+  const area = document.getElementById('validationArea');
+  area.className = `validation-area ${state}`;
+  document.getElementById('valStatusText').textContent = status;
+  document.getElementById('valMsg').textContent = msg;
+}
+
+function checkCode() {
+  const code = document.getElementById('codeEditor').value;
+  const s = steps[currentStep];
+
+  if (s.validate(code)) {
+    setValidation('success', '✅ Correto!', s.successMsg);
+    if (!completedSteps.has(currentStep)) {
+      completedSteps.add(currentStep);
+      xp += XP_PER_STEP;
+      updateXP();
+    }
+    updateDots();
+
+    if (s.isLast) {
+      setTimeout(() => celebrate(), 800);
+    } else {
+      document.getElementById('nextBtn').classList.add('visible');
+    }
+  } else {
+    setValidation('error', '⚠️ Ainda não está certo...', s.errorMsg);
+    // shake editor
+    const ep = document.querySelector('.editor-panel');
+    ep.style.animation = 'none';
+    ep.offsetHeight;
+    ep.style.animation = 'shake .3s ease';
+  }
+}
+
+function updateXP() {
+  const pct = Math.min(100, (xp / (steps.length * XP_PER_STEP)) * 100);
+  document.getElementById('xpBar').style.width = pct + '%';
+  document.getElementById('xpTxt').textContent = `XP: ${xp} / ${steps.length * XP_PER_STEP}`;
+}
+
+function nextStep() {
+  if (currentStep < steps.length - 1) {
+    loadStep(currentStep + 1);
+    document.querySelector('.guide-body').scrollTop = 0;
+  }
+}
+
+function jumpTo(idx) {
+  loadStep(idx);
+  document.querySelector('.guide-body').scrollTop = 0;
+}
+
+// ─────────────────────────────────────────────
+// HINT & SOLUTION
+// ─────────────────────────────────────────────
+function toggleHint() {
+  const box = document.getElementById('hintBox');
+  const btn = document.getElementById('hintToggle');
+
+  if (hintUsed && !box.classList.contains('open')) {
+    // already used and closed — do nothing (button is disabled)
+    return;
+  }
+
+  if (!box.classList.contains('open')) {
+    // opening for the first time
+    hintUsed = true;
+    box.classList.add('open');
+    btn.textContent = '🙈 Fechar dica (não poderá reabrir)';
+  } else {
+    // closing — lock it forever
+    box.classList.remove('open');
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+    btn.style.cursor = 'not-allowed';
+    btn.textContent = '🔒 Dica já utilizada';
+    document.getElementById('hintLabel').textContent = 'Dica encerrada para este passo.';
+  }
+}
+
+function showSolution() {
+  const s = steps[currentStep];
+  document.getElementById('solCode').textContent = s.solution;
+  document.getElementById('solModal').classList.add('open');
+}
+
+function closeSolution() {
+  document.getElementById('solModal').classList.remove('open');
+}
+
+function useSolution() {
+  const s = steps[currentStep];
+  document.getElementById('codeEditor').value = s.solution;
+  updateLineNumbers();
+  updatePreview();
+  closeSolution();
+  checkCode();
+}
+
+// ─────────────────────────────────────────────
+// CELEBRATION
+// ─────────────────────────────────────────────
+function celebrate() {
+  const cel = document.getElementById('celebration');
+  cel.classList.add('show');
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const colors = ['#2ecc8a','#5b8cff','#f5a623','#ff5370','#c792ea','#ffcb6b'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const dot = document.createElement('div');
+      dot.className = 'confetti-dot';
+      dot.style.cssText = `
+        left:${Math.random()*100}%;
+        width:${6+Math.random()*8}px;
+        height:${6+Math.random()*8}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        animation-duration:${2+Math.random()*2}s;
+        animation-delay:${Math.random()*0.5}s;
+        border-radius:${Math.random()>.5?'50%':'2px'};
+      `;
+      document.getElementById('celebration').appendChild(dot);
+      setTimeout(() => dot.remove(), 4000);
+    }, i * 30);
+  }
+}
+
+function restartAll() {
+  document.getElementById('celebration').classList.remove('show');
+  currentStep = 0;
+  completedSteps.clear();
+  xp = 0;
+  updateXP();
+  loadStep(0);
+}
+
+function confirmReset() {
+  if (confirm('Reiniciar do zero? Seu progresso será perdido.')) {
+    restartAll();
+  }
+}
+
+// ─────────────────────────────────────────────
+// SHAKE KEYFRAME (injected)
+// ─────────────────────────────────────────────
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-6px)}
+    40%{transform:translateX(6px)}
+    60%{transform:translateX(-4px)}
+    80%{transform:translateX(4px)}
+  }
+`;
+document.head.appendChild(shakeStyle);
+
+// ─────────────────────────────────────────────
+// KEYBOARD SHORTCUT: Ctrl+Enter to check
+// ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    checkCode();
+  }
+});
+
+// ─────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio: Monte o PC Certo</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg:#0d1117; --bg2:#161b27; --bg3:#1e2436; --bg4:#262d42;
+  --border:#2a3050; --border2:#3a4468;
+  --text:#dde3f5; --text2:#8b94b8; --text3:#565f84;
+  --blue:#4d7fff; --blue-d:#1a2a4d; --blue-t:#7aa3ff;
+  --green:#3ecf8e; --green-d:#0a2318; --green-t:#5de3a5;
+  --amber:#f5a623; --amber-d:#2d1e05; --amber-t:#f7bc57;
+  --red:#e85c5c; --red-d:#2a0e0e; --red-t:#f07878;
+  --purple:#a78bfa; --purple-d:#1a1030; --purple-t:#c4b0ff;
+  --teal:#2dd4bf; --teal-d:#08201c; --teal-t:#5ee8d6;
+  --coral:#f77b72; --coral-d:#2a0e0e;
+  --r:8px; --rl:12px; --font:'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh}
+.app{max-width:980px;margin:0 auto;padding:24px 16px}
+
+/* ---- TELA DE DESAFIOS ---- */
+.lobby-header{text-align:center;margin-bottom:2rem;padding-top:0.5rem}
+.lobby-header .icon{font-size:40px;color:var(--amber-t);display:block;margin-bottom:10px}
+.lobby-header h1{font-size:22px;font-weight:700;margin-bottom:6px}
+.lobby-header p{font-size:13px;color:var(--text2);max-width:520px;margin:0 auto}
+
+.challenges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:2rem}
+.ch-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.ch-card:not(.locked):hover{border-color:var(--border2);transform:translateY(-2px)}
+.ch-card.locked{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
+.ch-card.completed-pass{border-color:var(--green);background:linear-gradient(135deg,var(--bg2),var(--green-d))}
+.ch-card.completed-fail{border-color:var(--red)}
+.ch-card.available{border-color:var(--blue-d)}
+.ch-card .ch-icon{font-size:28px;margin-bottom:10px;display:block}
+.ch-card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.ch-card p{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.ch-card .ch-tags{display:flex;flex-wrap:wrap;gap:4px}
+.ch-card .ch-diff{position:absolute;top:10px;right:10px;font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px}
+.diff-facil{background:var(--green-d);color:var(--green-t);border:1px solid #164030}
+.diff-medio{background:var(--amber-d);color:var(--amber-t);border:1px solid #4a3010}
+.diff-dificil{background:var(--red-d);color:var(--red-t);border:1px solid #4a1414}
+.diff-expert{background:var(--purple-d);color:var(--purple-t);border:1px solid #3d2570}
+
+/* lock overlay */
+.lock-overlay{display:flex;align-items:center;gap:6px;margin-top:10px;padding:7px 10px;background:rgba(0,0,0,.35);border-radius:var(--r);font-size:11px;color:var(--text3);border:1px solid var(--border)}
+.lock-overlay i{color:var(--amber-t);font-size:14px}
+
+/* score badge on completed card */
+.ch-score-bar{margin-top:10px}
+.ch-score-row{display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px}
+.ch-score-bg{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.ch-score-fill{height:100%;border-radius:3px;transition:width .4s}
+
+/* progress header */
+.progress-header{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.ph-left{flex:1}
+.ph-title{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text2)}
+.ph-bar-bg{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.ph-bar-fill{height:100%;background:var(--green);border-radius:4px;transition:width .5s}
+.ph-right{text-align:center;min-width:80px}
+.ph-pts{font-size:22px;font-weight:700;color:var(--amber-t)}
+.ph-lbl{font-size:10px;color:var(--text3)}
+
+/* unlock toast */
+.unlock-toast{background:var(--green-d);border:1px solid var(--green);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:12px;animation:fadeIn .4s ease}
+.ut-icon{font-size:28px;color:var(--green-t)}
+.ut-text h4{font-size:13px;font-weight:600;color:var(--green-t);margin-bottom:3px}
+.ut-text p{font-size:11px;color:var(--text2)}
+
+/* ---- JOGO ---- */
+.game-header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;padding:12px 16px;background:var(--bg2);border-radius:var(--rl);border:1px solid var(--border)}
+.game-header .gh-icon{font-size:24px}
+.game-header .gh-info{flex:1}
+.game-header .gh-title{font-size:14px;font-weight:600}
+.game-header .gh-req{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.score-badge{text-align:center;background:var(--bg3);border-radius:var(--r);padding:8px 14px;border:1px solid var(--border);min-width:80px}
+.score-badge .sb-num{font-size:20px;font-weight:700;color:var(--amber-t)}
+.score-badge .sb-lbl{font-size:9px;color:var(--text3);text-transform:uppercase}
+
+.step-trail{display:flex;gap:6px;margin-bottom:1.5rem;overflow-x:auto}
+.trail-item{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:var(--r);font-size:11px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);white-space:nowrap;cursor:pointer;transition:all .15s}
+.trail-item:hover{border-color:var(--border2)}
+.trail-item.ti-active{border-color:var(--blue);color:var(--blue-t);background:var(--blue-d)}
+.trail-item.ti-done-perfect{border-color:var(--green);color:var(--green-t);background:var(--green-d)}
+.trail-item.ti-done-ok{border-color:var(--amber);color:var(--amber-t);background:var(--amber-d)}
+.trail-item.ti-done-bad{border-color:var(--red);color:var(--red-t);background:var(--red-d)}
+.trail-item i{font-size:14px}
+
+.game-layout{display:grid;grid-template-columns:1fr 270px;gap:16px;align-items:start}
+@media(max-width:700px){.game-layout{grid-template-columns:1fr}}
+
+.game-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem}
+.gp-title{font-size:15px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.gp-subtitle{font-size:11px;color:var(--text2);margin-bottom:1rem;line-height:1.4}
+
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:1rem}
+.comp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rl);padding:12px;cursor:pointer;transition:all .15s;position:relative}
+.comp-card:hover{border-color:var(--border2)}
+.comp-card.selected{border-color:var(--blue);background:var(--blue-d)}
+.comp-card.locked-sel{pointer-events:none}
+.comp-icon{font-size:20px;color:var(--text3);margin-bottom:6px}
+.comp-card.selected .comp-icon{color:var(--blue-t)}
+.comp-name{font-size:12px;font-weight:600;margin-bottom:3px;line-height:1.3;color:var(--text)}
+.comp-spec{font-size:10px;color:var(--text3);line-height:1.5}
+.comp-card.selected .comp-spec{color:var(--text2)}
+.chk{position:absolute;top:8px;right:8px;width:18px;height:18px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;opacity:0;transition:opacity .15s}
+.comp-card.selected .chk{opacity:1}
+.tier-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
+.t-b{background:var(--bg4);color:var(--text3)}
+.t-m{background:var(--blue-d);color:var(--blue-t);border:1px solid #1e3060}
+.t-a{background:var(--green-d);color:var(--green-t);border:1px solid #164030}
+.t-t{background:var(--purple-d);color:var(--purple-t);border:1px solid #3d2570}
+
+/* feedback após seleção */
+.feedback-panel{border-radius:var(--rl);padding:14px;margin-top:10px;animation:fadeIn .25s ease}
+.fp-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;font-weight:600}
+.fp-header i{font-size:18px}
+.fp-body{font-size:12px;line-height:1.6;color:var(--text2)}
+.fp-body strong{color:var(--text)}
+.fp-tip{margin-top:10px;padding:10px 12px;background:rgba(0,0,0,.25);border-radius:var(--r);font-size:11px;line-height:1.5;color:var(--teal-t);border-left:2px solid var(--teal)}
+.fp-tip b{color:var(--teal)}
+.fp-concept{margin-top:8px;padding:8px 12px;background:rgba(0,0,0,.2);border-radius:var(--r);font-size:11px;color:var(--amber-t);border-left:2px solid var(--amber)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.fp-perfect{background:var(--green-d);border:1px solid #1a4030}
+.fp-perfect .fp-header{color:var(--green-t)}
+.fp-ok{background:var(--amber-d);border:1px solid #4a3010}
+.fp-ok .fp-header{color:var(--amber-t)}
+.fp-bad{background:var(--red-d);border:1px solid #4a1414}
+.fp-bad .fp-header{color:var(--red-t)}
+
+/* painel lateral */
+.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;position:sticky;top:16px}
+.sp-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.req-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.req-item{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.4;padding:8px 10px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border)}
+.req-item i{font-size:14px;flex-shrink:0;margin-top:1px}
+.req-item.req-met{background:var(--green-d);border-color:#1a4030;color:var(--green-t)}
+.req-item.req-fail{background:var(--red-d);border-color:#4a1414;color:var(--red-t)}
+.req-item.req-pending{color:var(--text3)}
+.req-item .req-text{flex:1}
+
+.build-list{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.bl-row{display:flex;align-items:center;gap:8px;font-size:11px;padding:6px 8px;background:var(--bg3);border-radius:var(--r)}
+.bl-icon{font-size:14px;color:var(--text3);width:18px;flex-shrink:0}
+.bl-name{flex:1;color:var(--text);font-weight:500}
+.bl-pts{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+.pts-good{background:var(--green-d);color:var(--green-t)}
+.pts-ok{background:var(--amber-d);color:var(--amber-t)}
+.pts-bad{background:var(--red-d);color:var(--red-t)}
+
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+.nav-btns{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
+.btn{padding:8px 18px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;font-weight:500}
+.btn:hover{border-color:var(--blue);color:var(--blue-t);background:var(--blue-d)}
+.btn-p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-p:hover{background:#3d6fee;border-color:#3d6fee;color:#fff}
+.btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+/* resultado final */
+.result-wrap{animation:fadeIn .3s ease}
+.result-score-big{text-align:center;padding:2rem 1rem;background:var(--bg2);border-radius:var(--rl);border:1px solid var(--border);margin-bottom:1.5rem}
+.rsb-num{font-size:64px;font-weight:800;line-height:1}
+.rsb-max{font-size:20px;color:var(--text3)}
+.rsb-label{font-size:16px;font-weight:600;margin-top:8px}
+.rsb-sub{font-size:12px;color:var(--text2);margin-top:4px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.5}
+
+.breakdown-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.5rem}
+.bk-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem}
+.bk-icon{font-size:20px;margin-bottom:6px}
+.bk-name{font-size:11px;color:var(--text2);margin-bottom:2px}
+.bk-val{font-size:13px;font-weight:600;color:var(--text)}
+.bk-pts{font-size:11px;font-weight:700;margin-top:4px}
+
+.lesson-box{background:var(--teal-d);border:1px solid #1a3a35;border-radius:var(--rl);padding:1.25rem;margin-bottom:1.5rem}
+.lb-title{font-size:12px;font-weight:600;color:var(--teal-t);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.lb-item{display:flex;gap:8px;font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.5;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.lb-item:last-child{margin-bottom:0;border-bottom:none;padding-bottom:0}
+.lb-item i{font-size:14px;color:var(--teal-t);flex-shrink:0;margin-top:1px}
+.lb-item b{color:var(--text)}
+
+.tag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:10px;background:var(--bg4);color:var(--text3);margin-right:4px}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+
+/* ============================================================
+   DESAFIOS
+============================================================ */
+const CHALLENGES = [
+  {
+    id:'escritorio',
+    icon:'ti-building-office',
+    title:'PC para Escritório',
+    subtitle:'Monte um PC eficiente para tarefas de produtividade: planilhas, e-mail, videoconferência e navegação web.',
+    diff:'facil',
+    diffLabel:'Fácil',
+    requirements:[
+      { id:'cpu_ok',  text:'Processador eficiente (baixo TDP)' },
+      { id:'igpu_ok', text:'GPU integrada é suficiente — não precisa de dedicada' },
+      { id:'ssd_ok',  text:'SSD para boot rápido do sistema' },
+      { id:'ram_ok',  text:'16 GB RAM é o mínimo confortável hoje' },
+      { id:'psu_ok',  text:'Fonte econômica com boa eficiência' },
+    ],
+    steps:['cpu','ram','storage','gpu','audio','psu','case'],
+    ideal:{ cpu:'i3', ram:'16ddr4', storage:'ssd500', gpu:'igpu', audio:'onboard', psu:'550g', case:'matxcase' },
+    tips:{
+      cpu: 'Para escritório, um processador com TDP baixo (<65W) gera menos calor, é silencioso e economiza energia. Não há necessidade de overclock ou núcleos extras.',
+      ram: 'O Windows 11 com navegador e planilha abertas consome ~6–8 GB. 16 GB garante conforto sem gargalo de memória.',
+      storage: 'Um SSD SATA de 500 GB já entrega ~550 MB/s — suficiente para boot rápido e abertura ágil de aplicativos. NVMe seria superdimensionado aqui.',
+      gpu: 'Para escritório, vídeo integrado processa facilmente 4K e múltiplos monitores. GPU dedicada seria desperdício de energia e dinheiro.',
+      audio: 'Codec on-board (Realtek) com SNR de ~100 dB é mais que suficiente para videoconferências e reprodução casual.',
+      psu: 'Um sistema de escritório consume ~80–120W. Uma fonte 80+ Gold de 550W opera a ~20% da carga — muito eficiente e silenciosa.',
+      case:'Gabinete Micro-ATX oferece tamanho compacto, adequado para escritório, com espaço suficiente para refrigeração.'
+    }
+  },
+  {
+    id:'gamer1080',
+    icon:'ti-device-gamepad-2',
+    title:'PC Gamer 1080p',
+    subtitle:'Monte um PC equilibrado para jogos em Full HD com alta taxa de atualização (144Hz+).',
+    diff:'medio',
+    diffLabel:'Médio',
+    requirements:[
+      { id:'cpu_ok',  text:'CPU mid-range com boa velocidade mono-núcleo' },
+      { id:'gpu_ok',  text:'GPU dedicada adequada para 1080p/144Hz' },
+      { id:'nvme_ok', text:'NVMe para carregamento rápido de mapas' },
+      { id:'ram_ok',  text:'16 GB DDR4/DDR5 Dual Channel' },
+      { id:'psu_ok',  text:'Fonte com margem para picos de GPU' },
+    ],
+    steps:['cpu','ram','storage','gpu','audio','psu','case'],
+    ideal:{ cpu:'r5', ram:'16ddr5', storage:'nvme1', gpu:'rtx3060', audio:'onboard', psu:'650g', case:'atxmid' },
+    tips:{
+      cpu: 'Jogos dependem mais de velocidade por núcleo do que quantidade de núcleos. O Ryzen 5 7600X entrega excelente IPC e é custo-benefício ideal para 1080p.',
+      ram: '16 GB DDR5 em Dual Channel é suficiente para todos os jogos modernos. 32 GB seria exagero para gaming puro em 1080p.',
+      storage: 'NVMe Gen 3 (3.500 MB/s) reduz drasticamente o tempo de carregamento de mapas. A diferença para Gen 4 é imperceptível em jogos.',
+      gpu: 'A RTX 3060 12 GB é a escolha ideal para 1080p/144Hz na maioria dos jogos modernos com Ray Tracing leve e DLSS habilitado.',
+      audio: 'Para gaming, o áudio on-board com fone de ouvido é adequado. Investir em DAC externo só faz sentido com headsets de alta impedância.',
+      psu: 'RTX 3060 consome até 170W em pico. CPU + GPU + extras = ~350W. Uma fonte Gold de 650W mantém o sistema na faixa ideal de 50–60% de carga.',
+      case:'Mid Tower ATX oferece excelente fluxo de ar, suporta GPU de comprimento padrão e facilita a montagem. Ideal para o primeiro build gamer.'
+    }
+  },
+  {
+    id:'edicao4k',
+    icon:'ti-video',
+    title:'Workstation Edição 4K',
+    subtitle:'Monte um PC para edição de vídeo profissional em 4K, renderização 3D e criação de conteúdo.',
+    diff:'dificil',
+    diffLabel:'Difícil',
+    requirements:[
+      { id:'cpu_ok',  text:'CPU com muitos núcleos para renderização' },
+      { id:'gpu_ok',  text:'GPU com bastante VRAM (16 GB+)' },
+      { id:'nvme_ok', text:'NVMe rápido para cache de renderização' },
+      { id:'ram_ok',  text:'32 GB+ RAM para projetos complexos' },
+      { id:'psu_ok',  text:'Fonte robusta para componentes de alto TDP' },
+    ],
+    steps:['cpu','ram','storage','gpu','audio','psu','case'],
+    ideal:{ cpu:'r9', ram:'32ddr5', storage:'nvme2', gpu:'rtx4080', audio:'interface', psu:'1000p', case:'atxfull' },
+    tips:{
+      cpu: 'Renderização usa todos os núcleos em paralelo — o Ryzen 9 7950X com 16 núcleos/32 threads pode ser até 4× mais rápido que um quad-core em exports longos.',
+      ram: 'Projetos 4K RAW em DaVinci Resolve ou Premiere Pro consomem 16–24 GB facilmente. 32 GB garante fluidez na timeline sem swap para disco.',
+      storage: 'O NVMe Gen 4 (7.000 MB/s) é essencial como scratch disk para caches de renderização. A diferença para SSD SATA é de 12× na velocidade.',
+      gpu: 'Renderização GPU (CUDA/OpenCL), codificação de hardware e preview em tempo real de efeitos exigem VRAM abundante. 16 GB é o mínimo profissional.',
+      audio: 'Produção de conteúdo profissional exige interface de áudio com pré-amp XLR, monitoramento zero-latência e ADC de 24-bit/192kHz.',
+      psu: 'Ryzen 9 (170W) + RTX 4080 (320W) + extras = ~640W. Uma fonte de 1000W Platinum mantém o sistema a 64% da carga — faixa ideal e eficiente 24/7.',
+      case:'Full Tower é essencial para workstations: suporta E-ATX, múltiplos radiadores, GPUs longas e garante airflow generoso para componentes de alto TDP.'
+    }
+  },
+  {
+    id:'nas',
+    icon:'ti-server',
+    title:'Servidor NAS / RAID',
+    subtitle:'Monte um servidor de armazenamento doméstico com redundância de dados para backups e mídia.',
+    diff:'dificil',
+    diffLabel:'Difícil',
+    requirements:[
+      { id:'cpu_ok',  text:'CPU de baixo consumo (o NAS fica ligado 24/7)' },
+      { id:'hd_ok',   text:'HDs de alta capacidade para armazenamento em volume' },
+      { id:'raid_ok', text:'Múltiplos discos para RAID (mínimo 3 para RAID 5)' },
+      { id:'ram_ok',  text:'RAM suficiente para o sistema de arquivos' },
+      { id:'psu_ok',  text:'Fonte eficiente (custo de energia importa a longo prazo)' },
+    ],
+    steps:['cpu','ram','storage','gpu','audio','psu','case'],
+    ideal:{ cpu:'i3', ram:'16ddr4', storage:'hd4tb', gpu:'igpu', audio:'onboard', psu:'550g', case:'matxcase' },
+    tips:{
+      cpu: 'Um NAS não precisa de poder de processamento — precisa de eficiência energética. O i3 com TDP de 58W rodando 24/7 custa ~R$ 50/mês a menos que um i9.',
+      ram: 'Sistemas de arquivos como ZFS e ext4 com journaling usam RAM para cache. 16 GB é o recomendado para NAS com acesso simultâneo de múltiplos usuários.',
+      storage: 'HDs de 4 TB são a escolha custo/GB para armazenamento em volume — NVMe seria desperdício em um NAS. Lembre: RAID ≠ backup! Use a regra 3-2-1.',
+      gpu: 'Um servidor NAS não precisa de GPU dedicada — video integrado gerencia interface web e tarefas básicas com consumo mínimo de energia.',
+      audio: 'Servidores NAS operam geralmente sem monitor ou saída de áudio (headless). Áudio on-board é mais que suficiente — qualquer solução mais cara seria desperdício puro.',
+      psu: 'Eficiência é crucial em equipamentos 24/7. 80 PLUS Gold (92%) já representa grande economia. Platinum só se justifica em data centers com dezenas de servidores.',
+      case:'Micro-ATX é adequado para NAS — compacto, silencioso, com espaço para múltiplos HDs e boa ventilação passiva.'
+    }
+  },
+  {
+    id:'miniitx',
+    icon:'ti-box',
+    title:'Build Ultra-Compacto',
+    subtitle:'Monte um PC Mini-ITX para sala de estar ou home office com espaço limitado. Cada milímetro conta!',
+    diff:'expert',
+    diffLabel:'Expert',
+    requirements:[
+      { id:'itx_ok',  text:'Placa-mãe Mini-ITX (única opção no gabinete)' },
+      { id:'sfx_ok',  text:'Fonte SFX — ATX não cabe em gabinete ITX' },
+      { id:'cooler_ok',text:'Atenção à altura máxima do cooler' },
+      { id:'gpu_ok',  text:'GPU dentro do limite de comprimento do gabinete' },
+      { id:'case_ok', text:'Gabinete Mini-ITX com boa solução de airflow' },
+    ],
+    steps:['cpu','ram','storage','gpu','audio','psu','case'],
+    ideal:{ cpu:'r5', ram:'16ddr5', storage:'nvme1', gpu:'rtx3060', audio:'onboard', psu:'sfx650', case:'itxcase' },
+    tips:{
+      cpu: 'Em builds ITX, o gerenciamento térmico é crítico — CPUs com TDP moderado facilitam a refrigeração no espaço limitado. Overclocking extremo não é ideal.',
+      ram: 'Placas Mini-ITX têm apenas 2 slots de RAM. Use módulos de alta capacidade — você não poderá expandir além dos 2 slots disponíveis.',
+      storage: 'NVMe M.2 é a escolha perfeita para ITX: ocupa zero espaço físico, conecta direto na placa-mãe e entrega máximo desempenho.',
+      gpu: 'Gabinetes ITX têm limite de comprimento de GPU (~280mm). Verifique sempre antes de comprar — GPUs topo de linha costumam ter 300–336mm.',
+      audio: 'Espaço é precioso no ITX — áudio integrado elimina a necessidade de placa PCIe extra e preserva o único slot disponível para a GPU.',
+      psu: 'A fonte SFX é OBRIGATÓRIA em gabinetes Mini-ITX! Uma ATX simplesmente não cabe. SFX mede ~125×100×63mm vs ATX 150×140×86mm.',
+      case:'O gabinete ITX define toda a filosofia do build. Verifique: comprimento máximo da GPU, altura do cooler, suporte a AIO e número de baias de HDs.'
+    }
+  },
+];
+
+/* ============================================================
+   COMPONENTES
+============================================================ */
+const COMPS = {
+  cpu:[
+    {id:'i3',   name:'Intel Core i3-13100', tier:'t-m', icon:'ti-cpu', tdp:58,  socket:'LGA1700', specs:'4 núcleos · 58W TDP\nDDR4/DDR5 · iGPU',     tag:'Eficiente'},
+    {id:'i5',   name:'Intel Core i5-13600K',tier:'t-a', icon:'ti-cpu', tdp:125, socket:'LGA1700', specs:'14 núcleos · 125W TDP\nDDR4/DDR5 · OC',      tag:'Mid-Range'},
+    {id:'r5',   name:'AMD Ryzen 5 7600X',   tier:'t-a', icon:'ti-cpu', tdp:105, socket:'AM5',     specs:'6 núcleos · 105W TDP\nDDR5 · boa IPC',        tag:'Custo-Benef.'},
+    {id:'r7',   name:'AMD Ryzen 7 7700X',   tier:'t-a', icon:'ti-cpu', tdp:105, socket:'AM5',     specs:'8 núcleos · 105W TDP\nDDR5 · ótimo multi',    tag:'Avançado'},
+    {id:'r9',   name:'AMD Ryzen 9 7950X',   tier:'t-t', icon:'ti-cpu', tdp:170, socket:'AM5',     specs:'16 núcleos · 170W TDP\nDDR5 · workstation',   tag:'Extremo'},
+    {id:'i9',   name:'Intel Core i9-14900K',tier:'t-t', icon:'ti-cpu', tdp:253, socket:'LGA1700', specs:'24 núcleos · 253W TDP\nDDR4/DDR5 · extremo',  tag:'Extremo'},
+  ],
+  ram:[
+    {id:'8ddr4',  name:'8 GB DDR4-3200',   tier:'t-b', icon:'ti-stack-2', type:'ddr4', specs:'Single channel\nDDR4 3200 MHz · CL16',  tag:'Mínimo'},
+    {id:'16ddr4', name:'16 GB DDR4-3600',  tier:'t-m', icon:'ti-stack-2', type:'ddr4', specs:'Dual channel\nDDR4 3600 MHz · CL18',    tag:'Recom. DDR4'},
+    {id:'16ddr5', name:'16 GB DDR5-5600',  tier:'t-m', icon:'ti-stack-2', type:'ddr5', specs:'Dual channel\nDDR5 5600 MHz · CL46',    tag:'Recom. DDR5'},
+    {id:'32ddr5', name:'32 GB DDR5-6000',  tier:'t-a', icon:'ti-stack-2', type:'ddr5', specs:'Dual channel\nDDR5 6000 MHz · CL30',    tag:'Criação'},
+    {id:'64ddr5', name:'64 GB DDR5-6000',  tier:'t-t', icon:'ti-stack-2', type:'ddr5', specs:'Quad channel\nDDR5 6000 MHz · extremo', tag:'Workstation'},
+  ],
+  storage:[
+    {id:'hd2tb',  name:'HD 2 TB SATA',         tier:'t-b', icon:'ti-device-sd-card', type:'HD',   speed:160,   tdp:5, specs:'160 MB/s · 7200 RPM\nSATA III · FAT32/NTFS/ext4', tag:'Backup'},
+    {id:'hd4tb',  name:'HD 4 TB SATA',         tier:'t-b', icon:'ti-device-sd-card', type:'HD',   speed:160,   tdp:6, specs:'160 MB/s · 7200 RPM\nSATA III · ideal NAS',        tag:'Volume'},
+    {id:'ssd500', name:'SSD 500 GB SATA',      tier:'t-m', icon:'ti-device-sd-card', type:'SSD',  speed:550,   tdp:3, specs:'550 MB/s leit.\n520 MB/s escrita · SATA III',       tag:'Sistema'},
+    {id:'ssd1tb', name:'SSD 1 TB SATA',        tier:'t-m', icon:'ti-device-sd-card', type:'SSD',  speed:550,   tdp:3, specs:'550 MB/s leit.\n520 MB/s escrita · SATA III',       tag:'Popular'},
+    {id:'nvme1',  name:'NVMe 1 TB PCIe Gen 3', tier:'t-a', icon:'ti-bolt',           type:'NVMe', speed:3500,  tdp:4, specs:'3.500 MB/s leit.\n3.000 MB/s escrita · 23× SSD',    tag:'Recomendado'},
+    {id:'nvme2',  name:'NVMe 2 TB PCIe Gen 4', tier:'t-a', icon:'ti-bolt',           type:'NVMe', speed:7000,  tdp:5, specs:'7.000 MB/s leit.\n6.500 MB/s escrita · 44× SSD',    tag:'High-End'},
+    {id:'nvmeg5', name:'NVMe 2 TB PCIe Gen 5', tier:'t-t', icon:'ti-bolt',           type:'NVMe', speed:14000, tdp:6, specs:'14.000 MB/s leit.\n12.000 MB/s escrita · extremo',  tag:'Extremo'},
+  ],
+  gpu:[
+    {id:'igpu',    name:'Vídeo Integrado',   tier:'t-b', icon:'ti-device-desktop', tdp:0,   vram:0,  specs:'Compartilha RAM do sistema\nIntel UHD / Radeon iGPU',      tag:'Sem GPU'},
+    {id:'rtx3060', name:'RTX 3060 12 GB',   tier:'t-m', icon:'ti-device-desktop', tdp:170, vram:12, specs:'12 GB GDDR6 · 170W\nRT Gen 2 · DLSS 3 · 1080p/1440p',     tag:'1080p/1440p'},
+    {id:'rx7700',  name:'RX 7700 XT 12 GB', tier:'t-a', icon:'ti-device-desktop', tdp:245, vram:12, specs:'12 GB GDDR6 · 245W\nRDNA 3 · FSR 3 · 1440p',              tag:'1440p'},
+    {id:'rtx4070', name:'RTX 4070 12 GB',   tier:'t-a', icon:'ti-device-desktop', tdp:200, vram:12, specs:'12 GB GDDR6X · 200W\nRT Gen 3 · DLSS 3.5 · 1440p/4K',    tag:'1440p/4K'},
+    {id:'rtx4080', name:'RTX 4080 16 GB',   tier:'t-t', icon:'ti-device-desktop', tdp:320, vram:16, specs:'16 GB GDDR6X · 320W\nRT Gen 3 · DLSS 3.5 · 4K',          tag:'4K Pro'},
+    {id:'rtx4090', name:'RTX 4090 24 GB',   tier:'t-t', icon:'ti-device-desktop', tdp:450, vram:24, specs:'24 GB GDDR6X · 450W\nRT Gen 3 · 14.000 TOPS DLSS',       tag:'Extremo'},
+  ],
+  audio:[
+    {id:'onboard',   name:'Áudio On-Board',        tier:'t-b', icon:'ti-volume',     specs:'Realtek ALC · 100 dB SNR\nP2 3,5mm · Dolby/DTS virtual',    tag:'Básico'},
+    {id:'pcie',      name:'Placa PCIe Sound Blaster',tier:'t-m',icon:'ti-volume',     specs:'120 dB SNR · amp 600Ω\nDolby Atmos · surround 7.1',         tag:'Entusiasta'},
+    {id:'dac',       name:'DAC/AMP USB Externo',    tier:'t-a', icon:'ti-headphones', specs:'24-bit / 192kHz · 120 dB+\nZero interferência elétrica',     tag:'Audiófilo'},
+    {id:'interface', name:'Interface de Áudio USB', tier:'t-a', icon:'ti-microphone', specs:'2× XLR · pré-amp · 24b/192k\n0-latência · produção musical', tag:'Produção'},
+  ],
+  psu:[
+    {id:'400b',    name:'400W 80+ Bronze',    tier:'t-b', icon:'ti-bolt', watt:400,  cert:'Bronze', eff:85, sfx:false, specs:'85% eficiência\nATX semi-modular'},
+    {id:'550g',    name:'550W 80+ Gold',      tier:'t-m', icon:'ti-bolt', watt:550,  cert:'Gold',   eff:92, sfx:false, specs:'92% eficiência\nATX full-modular'},
+    {id:'650g',    name:'650W 80+ Gold',      tier:'t-m', icon:'ti-bolt', watt:650,  cert:'Gold',   eff:92, sfx:false, specs:'92% eficiência\nATX full-modular · OVP/OCP'},
+    {id:'850g',    name:'850W 80+ Gold',      tier:'t-a', icon:'ti-bolt', watt:850,  cert:'Gold',   eff:92, sfx:false, specs:'92% eficiência\nATX full-modular · proteções completas'},
+    {id:'1000p',   name:'1000W 80+ Platinum', tier:'t-t', icon:'ti-bolt', watt:1000, cert:'Platinum',eff:94,sfx:false, specs:'94% eficiência\nATX full-modular · 24/7'},
+    {id:'sfx650',  name:'SFX 650W 80+ Gold',  tier:'t-a', icon:'ti-bolt', watt:650,  cert:'Gold',   eff:92, sfx:true,  specs:'92% eficiência · SFX\nObrigatória para Mini-ITX'},
+  ],
+  case:[
+    {id:'itxcase',  name:'Mini-ITX SFF',      tier:'t-m', icon:'ti-box', form:'Mini-ITX', specs:'Mini-ITX apenas · 2 fans\nGPU ≤ 280mm · Cooler ≤ 65mm', tag:'Compacto'},
+    {id:'matxcase', name:'Micro-ATX Mid',     tier:'t-m', icon:'ti-box', form:'Micro-ATX',specs:'mATX / ITX · 3 fans\nGPU ≤ 330mm · Cooler ≤ 165mm',   tag:'Médio'},
+    {id:'atxmid',   name:'ATX Mid Tower',     tier:'t-a', icon:'ti-box', form:'ATX',      specs:'ATX/mATX/ITX · 4 fans\nGPU ≤ 400mm · Cooler ≤ 170mm',  tag:'Popular'},
+    {id:'atxfull',  name:'ATX Full Tower',    tier:'t-t', icon:'ti-box', form:'Full',     specs:'E-ATX/ATX/mATX/ITX · 6 fans\nSem limite de GPU prático', tag:'Workstation'},
+    {id:'meshitx',  name:'SFF Premium ITX',   tier:'t-t', icon:'ti-box', form:'Mini-ITX', specs:'Mini-ITX premium · AIO incl.\nGPU ≤ 305mm · vidro temp.',tag:'Premium ITX'},
+  ],
+};
+
+/* pontuação por componente em cada desafio */
+const SCORING = {
+  escritorio:{
+    cpu:   { i3:100, i5:50,  r5:60,  r7:30,  r9:0,   i9:0 },
+    ram:   { '8ddr4':40, '16ddr4':100, '16ddr5':80, '32ddr5':30, '64ddr5':0 },
+    storage:{ hd2tb:50, hd4tb:40, ssd500:100, ssd1tb:90, nvme1:50, nvme2:20, nvmeg5:0 },
+    gpu:   { igpu:100, rtx3060:40, rx7700:20, rtx4070:10, rtx4080:0, rtx4090:0 },
+    audio: { onboard:100, pcie:60, dac:40, interface:20 },
+    psu:   { '400b':80, '550g':100, '650g':90, '850g':40, '1000p':10, sfx650:50 },
+    case:  { itxcase:70, matxcase:100, atxmid:80, atxfull:30, meshitx:50 },
+  },
+  gamer1080:{
+    cpu:   { i3:40, i5:80,  r5:100, r7:90,  r9:50,  i9:40 },
+    ram:   { '8ddr4':30, '16ddr4':90, '16ddr5':100, '32ddr5':70, '64ddr5':30 },
+    storage:{ hd2tb:10, hd4tb:10, ssd500:50, ssd1tb:70, nvme1:100, nvme2:80, nvmeg5:50 },
+    gpu:   { igpu:0,  rtx3060:100, rx7700:80, rtx4070:80, rtx4080:40, rtx4090:20 },
+    audio: { onboard:100, pcie:70, dac:60, interface:30 },
+    psu:   { '400b':10, '550g':70, '650g':100, '850g':80, '1000p':40, sfx650:60 },
+    case:  { itxcase:40, matxcase:70, atxmid:100, atxfull:60, meshitx:50 },
+  },
+  edicao4k:{
+    cpu:   { i3:0,  i5:40,  r5:40,  r7:70,  r9:100, i9:90 },
+    ram:   { '8ddr4':0,  '16ddr4':30, '16ddr5':50, '32ddr5':100, '64ddr5':90 },
+    storage:{ hd2tb:20, hd4tb:30, ssd500:20, ssd1tb:30, nvme1:70, nvme2:100, nvmeg5:90 },
+    gpu:   { igpu:0,  rtx3060:40, rx7700:40, rtx4070:70, rtx4080:100, rtx4090:90 },
+    audio: { onboard:50, pcie:60, dac:70, interface:100 },
+    psu:   { '400b':0, '550g':20, '650g':40, '850g':80, '1000p':100, sfx650:20 },
+    case:  { itxcase:0, matxcase:40, atxmid:70, atxfull:100, meshitx:0 },
+  },
+  nas:{
+    cpu:   { i3:100, i5:70, r5:80, r7:50, r9:20, i9:10 },
+    ram:   { '8ddr4':70, '16ddr4':100, '16ddr5':90, '32ddr5':70, '64ddr5':40 },
+    storage:{ hd2tb:80, hd4tb:100, ssd500:40, ssd1tb:50, nvme1:20, nvme2:10, nvmeg5:0 },
+    gpu:   { igpu:100, rtx3060:30, rx7700:20, rtx4070:10, rtx4080:0, rtx4090:0 },
+    audio: { onboard:100, pcie:40, dac:30, interface:10 },
+    psu:   { '400b':60, '550g':100, '650g':80, '850g':30, '1000p':10, sfx650:50 },
+    case:  { itxcase:60, matxcase:100, atxmid:80, atxfull:30, meshitx:40 },
+  },
+  miniitx:{
+    cpu:   { i3:70, i5:70, r5:100, r7:90, r9:40, i9:30 },
+    ram:   { '8ddr4':40, '16ddr4':60, '16ddr5':100, '32ddr5':80, '64ddr5':50 },
+    storage:{ hd2tb:10, hd4tb:10, ssd500:50, ssd1tb:60, nvme1:100, nvme2:90, nvmeg5:70 },
+    gpu:   { igpu:50, rtx3060:100, rx7700:70, rtx4070:80, rtx4080:30, rtx4090:0 },
+    audio: { onboard:100, pcie:0, dac:80, interface:40 },
+    psu:   { '400b':10, '550g':20, '650g':20, '850g':10, '1000p':0, sfx650:100 },
+    case:  { itxcase:100, matxcase:0, atxmid:0, atxfull:0, meshitx:90 },
+  },
+};
+
+const FEEDBACK = {
+  escritorio:{
+    cpu:{
+      i3:  {type:'perfect', title:'Escolha perfeita!', body:'O Core i3 com 58W TDP é exatamente o que este PC precisa. <strong>Baixo consumo</strong>, silencioso, e lida com todas as tarefas de escritório com facilidade. Menos calor gerado = ventiladores mais lentos = PC mais silencioso no ambiente de trabalho.', tip:'Um PC de escritório fica ligado ~8h/dia. A diferença de consumo entre i3 (58W) e i9 (253W) representa ~R$ 450/ano na conta de luz.', concept:'TDP (Thermal Design Power) indica o calor máximo que o cooler deve dissipar — e reflete o consumo elétrico real do processador.'},
+      i5:  {type:'ok',      title:'Funciona, mas é demais.', body:'O i5 vai funcionar perfeitamente, mas <strong>você está pagando por capacidade que nunca usará</strong> em tarefas de escritório. O TDP de 125W também significa mais calor e ventiladores mais barulhentos.', tip:'Regra de ouro: sempre dimensione o processador para a carga real esperada, não para o máximo teórico.'},
+      r5:  {type:'ok',      title:'Bom, mas levemente superdimensionado.', body:'O Ryzen 5 é excelente custo-benefício para gaming, mas para escritório os 6 núcleos são subutilizados. <strong>Funciona muito bem</strong>, porém o i3 seria mais eficiente energeticamente.'},
+      r7:  {type:'bad',     title:'Superdimensionado demais.', body:'8 núcleos para escritório é como usar um caminhão para entregar uma pizza. <strong>Os núcleos extras ficam ociosos</strong> 99% do tempo, e o TDP de 105W gera mais calor e ruído sem benefício nenhum.'},
+      r9:  {type:'bad',     title:'Escolha errada para este cenário.', body:'16 núcleos e 170W TDP para planilhas e e-mail? Os núcleos extras ficam literalmente dormindo. <strong>Desperdício de energia e recursos</strong>. Em um escritório, o custo de energia a longo prazo supera o benefício zero de ter mais núcleos.', tip:'O Ryzen 9 7950X consome ~170W. Ligado 8h/dia, 22 dias/mês = ~R$ 600/ano a mais na conta de luz comparado ao i3.'},
+      i9:  {type:'bad',     title:'Escolha errada para este cenário.', body:'253W TDP num PC de escritório é inaceitável. Além do custo energético, gera tanto calor que exige refrigeração líquida — completamente desnecessário para Word e e-mail.'},
+    },
+    ram:{
+      '8ddr4':  {type:'ok',     title:'Funciona, mas apertado.', body:'8 GB funciona, mas o <strong>Windows 11 + navegador + Outlook + Teams</strong> juntos consomem facilmente 6–7 GB. Com 8 GB, o sistema vai recorrer ao arquivo de paginação (swap) com frequência, tornando o PC lento.', concept:'Arquivo de paginação = memória virtual no HD/SSD. Quando a RAM enche, o sistema usa o disco como "RAM extra" — porém dezenas a centenas de vezes mais lento.'},
+      '16ddr4': {type:'perfect',title:'Escolha ideal!', body:'16 GB em Dual Channel é o <strong>ponto ideal para escritório em 2024</strong>. O sistema roda com folga, múltiplas abas do Chrome ficam na memória sem lentidão, e o Dual Channel (2× 8GB) aumenta a largura de banda disponível para a iGPU.', tip:'Dual Channel dobra a largura de banda de memória. Para video integrado que compartilha essa memória, isso tem impacto real no desempenho gráfico.'},
+      '16ddr5': {type:'ok',     title:'Bom, mas DDR5 é overkill aqui.', body:'16 GB DDR5 é excelente, mas para escritório a <strong>diferença de velocidade sobre DDR4 não é perceptível</strong>. O custo adicional não traz retorno real neste cenário de uso.'},
+      '32ddr5': {type:'ok',     title:'Mais do que suficiente.', body:'32 GB é confortável demais para escritório. Vai funcionar perfeitamente, mas <strong>você está pagando por capacidade que não usará</strong>. Só valeria em cenários com máquinas virtuais ou bases de dados locais.'},
+      '64ddr5': {type:'bad',    title:'Completamente superdimensionado.', body:'64 GB de RAM em um PC de escritório é dinheiro jogado fora. O sistema operacional e aplicativos de escritório nunca vão usar metade disso.'},
+    },
+    storage:{
+      hd2tb:   {type:'ok',     title:'Funciona, mas prejudica a experiência.', body:'Um HD torna o boot do Windows muito lento (~2–3 minutos) e a abertura de aplicativos demora. <strong>Para escritório moderno, SSD é indispensável</strong>. A diferença de experiência é gritante.', concept:'HD: 160 MB/s e latência de ~8ms. SSD SATA: 550 MB/s e latência de <0,1ms. O boot com SSD dura ~15s vs ~90s com HD.'},
+      hd4tb:   {type:'bad',    title:'Escolha errada para o sistema.', body:'HD de 4 TB como disco do sistema é um retrocesso em 2024. <strong>Jamais use HD para o sistema operacional</strong>. A experiência é inaceitavelmente lenta. Use HD apenas para armazenamento de dados secundários.'},
+      ssd500:  {type:'perfect',title:'Escolha perfeita!', body:'SSD SATA de 500 GB é <strong>ideal para um PC de escritório</strong>: boot em ~12 segundos, abertura instantânea de aplicativos, e a capacidade é suficiente para o SO + aplicativos + documentos de trabalho.', tip:'Lembrete importante: sistemas de arquivos importam! O Windows usa NTFS (com journaling e ACL), que garante integridade dos dados mesmo em desligamentos abruptos.'},
+      ssd1tb:  {type:'ok',     title:'Boa escolha!', body:'1 TB SSD é uma boa escolha — a capacidade extra dá conforto para armazenar mais arquivos localmente. <strong>Só não é "perfeito" porque 500 GB seria suficiente</strong> para o uso de escritório típico.'},
+      nvme1:   {type:'ok',     title:'Rápido demais para a necessidade.', body:'NVMe Gen 3 entrega 3.500 MB/s — incrível, mas <strong>aplicativos de escritório não conseguem nem perceber a diferença</strong> para SSD SATA. O gargalo está na CPU e na interface, não no armazenamento.', concept:'A regra do gargalo: o desempenho percebido é limitado pelo componente mais lento da cadeia. Para abrir um Excel, o tempo de carregamento depende mais do SO e da CPU do que do disco.'},
+      nvme2:   {type:'bad',    title:'Superdimensionado.', body:'NVMe Gen 4 a 7.000 MB/s para escritório é como comprar um Porsche para fazer compras no mercado. <strong>Desperdício de investimento</strong>.'},
+      nvmeg5:  {type:'bad',    title:'Extremamente superdimensionado.', body:'14.000 MB/s para abrir planilhas é absurdo. Nenhuma tarefa de escritório vai se beneficiar dessa velocidade.'},
+    },
+    gpu:{
+      igpu:    {type:'perfect',title:'Exatamente o certo!', body:'Para escritório, o <strong>video integrado é a resposta certa</strong>. Ele suporta até 3 monitores 4K simultaneamente, acelera por hardware H.265 e AV1 para videoconferências, e consome <5W vs 170W+ de uma GPU dedicada.', tip:'Intel UHD 770 suporta: 3× saídas 4K@60Hz, decode de H.265/HEVC/AV1 por hardware, e DirectX 12 para aplicativos Office com aceleração gráfica.'},
+      rtx3060: {type:'bad',    title:'Desperdício completo.', body:'Uma RTX 3060 em PC de escritório fica ociosa >99% do tempo. <strong>Consome 170W extras constantemente</strong> (mesmo em idle ~20W), aumenta o calor, barulho dos fans, e não traz nenhum benefício para planilhas e e-mail.'},
+      rx7700:  {type:'bad',    title:'GPU errada para este cenário.', body:'245W TDP em um PC de escritório? Os fans vão trabalhar desnecessariamente, o custo de energia sobe, e a GPU fica parada. <strong>Video integrado resolve todas as demandas visuais do escritório</strong>.'},
+      rtx4070: {type:'bad',    title:'Muito errado para este caso.', body:'GPU de alto desempenho em PC de escritório é o erro clássico de superdimensionamento. Custo desnecessário, mais ruído, mais consumo — sem nenhum retorno.'},
+      rtx4080: {type:'bad',    title:'Escolha completamente inadequada.', body:'GPU profissional de 320W num PC de escritório. O investimento não faz nenhum sentido técnico para este perfil de uso.'},
+      rtx4090: {type:'bad',    title:'A pior escolha possível aqui.', body:'A GPU mais potente do mercado consumidor em um PC que vai abrir planilhas. 450W permanentes, calor extremo, e absolutamente zero benefício no escritório.'},
+    },
+    audio:{
+      onboard:  {type:'perfect',title:'Correto!', body:'Codec on-board é <strong>mais que suficiente para escritório</strong>. ~100 dB SNR garante áudio limpo para videoconferências, reprodução de música e notificações.', concept:'SNR (Signal-to-Noise Ratio): relação sinal/ruído em dB. Para referência: CD quality = 96 dB, hi-res audio = 120 dB+. Para videoconferência, 90 dB é excelente.'},
+      pcie:     {type:'ok',     title:'Funciona, ocupa slot PCIe desnecessariamente.', body:'Placa de som PCIe no escritório é um exagero — o slot poderia ser reservado para outros fins. Mas funciona muito bem.'},
+      dac:      {type:'ok',     title:'Bom para audiófilos.', body:'DAC USB externo melhora a experiência de áudio em ~20%, mas para chamadas de Teams e reuniões Zoom o on-board já é excelente.'},
+      interface:{type:'bad',    title:'Superdimensionado.', body:'Interface de áudio profissional com entradas XLR em PC de escritório? A menos que você grave podcasts ou música, é um investimento sem retorno.'},
+    },
+    psu:{
+      '400b':   {type:'ok',     title:'Funciona, mas certificação fraca.', body:'400W é suficiente para escritório (consome ~100W no pico). O problema é o 80+ Bronze: <strong>85% de eficiência</strong> desperdiça mais energia e os componentes internos são de menor qualidade.', concept:'Eficiência 80+ Gold (92%) vs Bronze (85%): com 100W de consumo real, Gold consome 109W da tomada, Bronze consome 118W — diferença de ~R$ 40/ano.'},
+      '550g':   {type:'perfect',title:'Escolha ideal!', body:'<strong>80+ Gold de 550W é a combinação perfeita para escritório</strong>. Sistema consumindo ~100W significa operação a 18% da capacidade — zona de altíssima eficiência. Capacitores japoneses, proteções OVP/OCP/SCP, e longa vida útil.', tip:'Fontes 80+ Gold operam com 92% de eficiência. Para uso 24/7 num servidor ou PC que fica sempre ligado, a diferença de eficiência impacta diretamente a conta de luz.'},
+      '650g':   {type:'ok',     title:'Boa escolha, levemente grande.', body:'Excelente fonte, mas um pouco superdimensionada para escritório. Funciona perfeitamente — o sistema vai operar na faixa de máxima eficiência (15% de carga).'},
+      '850g':   {type:'ok',     title:'Exagero, mas não prejudica.', body:'850W para ~100W de consumo é muita capacidade ociosa. Tecnicamente funciona, mas o investimento não se justifica.'},
+      '1000p':  {type:'bad',    title:'Extremamente superdimensionado.', body:'1000W Platinum para um PC de escritório que consome 100W? Operando a 10% da carga, abaixo da faixa de máxima eficiência. Custo altíssimo sem retorno.'},
+      sfx650:   {type:'ok',     title:'SFX é para Mini-ITX.', body:'Fonte SFX é projetada para gabinetes Mini-ITX compactos. Funciona em gabinetes ATX com adaptador, mas é desnecessariamente cara para este formato.'},
+    },
+    case:{
+      itxcase:  {type:'ok',     title:'Compacto e funcional.', body:'Mini-ITX é uma boa opção para escritório com espaço limitado. Porém, verifique compatibilidade com a placa-mãe selecionada.'},
+      matxcase: {type:'perfect',title:'Tamanho ideal para escritório!', body:'Micro-ATX oferece o <strong>equilíbrio perfeito</strong>: tamanho moderado para não ocupar muito espaço na mesa, ventilação adequada, e custo acessível. Suporta placas mATX com conectividade suficiente para escritório.', tip:'Airflow básico: 2 fans frontais como intake + 1 traseiro como exhaust. Pressão levemente positiva (mais entrada que saída) reduz acúmulo de poeira — importante em ambientes de escritório.'},
+      atxmid:   {type:'ok',     title:'Grande demais para escritório, mas funciona.', body:'Mid Tower ATX é ótimo, mas para escritório o tamanho pode ser excessivo para a mesa de trabalho. Boa escolha se o espaço não for problema.'},
+      atxfull:  {type:'bad',    title:'Desnecessariamente grande.', body:'Full Tower para escritório é um exagero de proporções. O gabinete vai dominar o ambiente de trabalho sem nenhum benefício técnico para este perfil.'},
+      meshitx:  {type:'ok',     title:'Premium e compacto.', body:'SFF premium é uma boa opção para escritório elegante. Só verifique compatibilidade com a placa-mãe e a GPU escolhida.'},
+    },
+  },
+  // (outros desafios usam lógica genérica)
+};
+
+const UNLOCK_MIN = 600;
+
+// ============================================================
+// PROGRESSO (persistido em localStorage)
+// ============================================================
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem('pc_challenge_progress')||'{}'); }
+  catch(e) { return {}; }
+}
+function saveProgress(id, score) {
+  const p = loadProgress();
+  if(!p[id] || score > p[id]) p[id] = score;
+  try { localStorage.setItem('pc_challenge_progress',JSON.stringify(p)); } catch(e){}
+}
+function resetProgress() {
+  try { localStorage.removeItem('pc_challenge_progress'); } catch(e){}
+}
+function isUnlocked(idx) {
+  if(idx === 0) return true;
+  const prev = CHALLENGES[idx-1];
+  const p = loadProgress();
+  return (p[prev.id]||0) >= UNLOCK_MIN;
+}
+function getMaxScore(ch) { return ch.steps.length * 100; }
+function getTotalXP() {
+  const p = loadProgress();
+  return CHALLENGES.reduce((acc,ch) => acc + (p[ch.id]||0), 0);
+}
+
+// ============================================================
+// ESTADO DA SESSÃO
+// ============================================================
+let screen = 'lobby'; // lobby | game | result
+let challenge = null;
+let currentStepIdx = 0;
+let selections = {};
+let scores = {};
+let feedbackShown = {};
+let justUnlocked = null; // id do próximo desafio recém-desbloqueado
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  if(screen==='lobby') app.innerHTML = renderLobby();
+  else if(screen==='game') app.innerHTML = renderGame();
+  else app.innerHTML = renderResult();
+}
+
+function renderLobby() {
+  const progress = loadProgress();
+  const totalXP = getTotalXP();
+  const maxXP = CHALLENGES.reduce((a,ch)=>a+getMaxScore(ch),0);
+  const completedCount = CHALLENGES.filter(ch=>(progress[ch.id]||0)>=UNLOCK_MIN).length;
+
+  const cardsHtml = CHALLENGES.map((ch,idx) => {
+    const unlocked = isUnlocked(idx);
+    const score = progress[ch.id]||0;
+    const done = score > 0;
+    const passed = score >= UNLOCK_MIN;
+    const maxSc = getMaxScore(ch);
+    const pct = Math.min(100,Math.round(score/maxSc*100));
+
+    let cardClass = 'ch-card';
+    if(!unlocked) cardClass += ' locked';
+    else if(passed) cardClass += ' completed-pass';
+    else if(done) cardClass += ' completed-fail';
+    else cardClass += ' available';
+
+    const clickable = unlocked ? `onclick="startChallenge('${ch.id}')"` : '';
+
+    const prevCh = idx > 0 ? CHALLENGES[idx-1] : null;
+    const prevScore = prevCh ? (progress[prevCh.id]||0) : 0;
+
+    let statusHtml = '';
+    if(!unlocked) {
+      statusHtml = `<div class="lock-overlay">
+        <i class="ti ti-lock"></i>
+        <span>Precisa de <strong>${UNLOCK_MIN} pts</strong> em "${prevCh?.title}" — você tem ${prevScore} pts</span>
+      </div>`;
+    } else if(done) {
+      const barColor = passed ? 'var(--green)' : 'var(--amber)';
+      statusHtml = `<div class="ch-score-bar">
+        <div class="ch-score-row">
+          <span style="color:var(--text3)">Melhor pontuação</span>
+          <span style="color:${passed?'var(--green-t)':'var(--amber-t)'};font-weight:700">${score}/${maxSc} pts</span>
+        </div>
+        <div class="ch-score-bg">
+          <div class="ch-score-fill" style="width:${pct}%;background:${barColor}"></div>
+        </div>
+      </div>`;
+    } else {
+      statusHtml = `<div class="ch-tags">
+        ${ch.requirements.slice(0,3).map(r=>`<span class="tag">${r.text.split(' ').slice(0,3).join(' ')}</span>`).join('')}
+      </div>`;
+    }
+
+    return `<div class="${cardClass}" ${clickable}>
+      <span class="ch-diff diff-${ch.diff}">${ch.diffLabel}</span>
+      ${passed?`<span style="position:absolute;top:10px;left:10px;font-size:16px">✅</span>`:''}
+      <i class="ti ${unlocked?ch.icon:'ti-lock'} ch-icon" style="color:${!unlocked?'var(--text3)':passed?'var(--green-t)':'var(--amber-t)'}"></i>
+      <h3>${ch.title}</h3>
+      <p>${ch.subtitle}</p>
+      ${statusHtml}
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="lobby-header">
+    <i class="ti ti-cpu icon"></i>
+    <h1>Desafio: Monte o PC Certo</h1>
+    <p>Complete cada desafio com <strong style="color:var(--amber-t)">${UNLOCK_MIN} pontos ou mais</strong> para desbloquear o próximo nível.</p>
+  </div>
+
+  <div class="progress-header">
+    <div class="ph-left">
+      <div class="ph-title">
+        <i class="ti ti-trophy" style="color:var(--amber-t)"></i>
+        Progresso Geral — ${completedCount}/${CHALLENGES.length} desafios concluídos
+      </div>
+      <div class="ph-bar-bg">
+        <div class="ph-bar-fill" style="width:${Math.round(completedCount/CHALLENGES.length*100)}%"></div>
+      </div>
+    </div>
+    <div class="ph-right">
+      <div class="ph-pts">${totalXP}</div>
+      <div class="ph-lbl">XP Total / ${maxXP}</div>
+    </div>
+    ${totalXP > 0 ? `<button class="btn" onclick="confirmReset()" style="font-size:11px;padding:6px 10px;opacity:.5">
+      <i class="ti ti-trash"></i>Resetar
+    </button>`:''}
+  </div>
+
+  <div class="challenges-grid">${cardsHtml}</div>
+  <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:4px">
+    <i class="ti ti-info-circle" style="vertical-align:-2px"></i>
+    Mínimo de ${UNLOCK_MIN} pontos para desbloquear o próximo desafio · Seu progresso é salvo automaticamente
+  </div>`;
+}
+
+function startChallenge(id) {
+  const idx = CHALLENGES.findIndex(c=>c.id===id);
+  if(!isUnlocked(idx)) return;
+  challenge = CHALLENGES.find(c=>c.id===id);
+  selections = {};
+  scores = {};
+  feedbackShown = {};
+  currentStepIdx = 0;
+  justUnlocked = null;
+  screen = 'game';
+  render();
+}
+
+function getStepKey(idx) { return challenge.steps[idx]; }
+function getStepLabel(k) {
+  const m = {cpu:'Processador',ram:'Memória RAM',storage:'Armazenamento',gpu:'GPU / Vídeo',audio:'Áudio',psu:'Fonte PSU',case:'Gabinete',mobo:'Placa-Mãe'};
+  return m[k]||k;
+}
+function getStepIcon(k) {
+  const m = {cpu:'ti-cpu',ram:'ti-stack-2',storage:'ti-device-sd-card',gpu:'ti-device-desktop',audio:'ti-volume',psu:'ti-bolt',case:'ti-box',mobo:'ti-circuit-board'};
+  return m[k]||'ti-circle';
+}
+
+function renderGame() {
+  const key = getStepKey(currentStepIdx);
+  const items = COMPS[key] || [];
+  const sel = selections[key];
+  const fb = feedbackShown[key];
+
+  const trailHtml = challenge.steps.map((k,i) => {
+    const done = selections[k] !== undefined;
+    const active = i === currentStepIdx;
+    const sc = scores[k];
+    let cls = 'ti-active' ? '' : '';
+    if(active) cls='ti-active';
+    else if(done) cls = sc>=80?'ti-done-perfect':sc>=50?'ti-done-ok':'ti-done-bad';
+    return `<div class="trail-item ${cls}" onclick="goStep(${i})">
+      <i class="ti ${getStepIcon(k)}"></i>${getStepLabel(k)}
+      ${done&&!active?`<i class="ti ${sc>=80?'ti-check':sc>=50?'ti-exclamation-mark':'ti-x'}" style="font-size:11px;opacity:.7"></i>`:''}
+    </div>`;
+  }).join('');
+
+  const reqsHtml = challenge.requirements.map(r => {
+    const met = checkReq(r.id);
+    return `<div class="req-item ${met===true?'req-met':met===false?'req-fail':'req-pending'}">
+      <i class="ti ${met===true?'ti-check':met===false?'ti-x':'ti-circle-dotted'}"></i>
+      <span class="req-text">${r.text}</span>
+    </div>`;
+  }).join('');
+
+  const buildHtml = challenge.steps.filter(k=>selections[k]!==undefined).map(k => {
+    const item = (COMPS[k]||[]).find(x=>x.id===selections[k]);
+    const sc = scores[k];
+    return item?`<div class="bl-row">
+      <i class="ti ${getStepIcon(k)} bl-icon"></i>
+      <span class="bl-name">${item.name.split(' ').slice(0,3).join(' ')}</span>
+      <span class="bl-pts ${sc>=80?'pts-good':sc>=50?'pts-ok':'pts-bad'}">${sc}pts</span>
+    </div>`:'';
+  }).join('');
+
+  const totalScore = Object.values(scores).reduce((a,b)=>a+b,0);
+  const maxScore = Object.keys(scores).length * 100;
+
+  let feedbackHtml = '';
+  if(fb) {
+    const f = getFeedback(key, sel);
+    feedbackHtml = `<div class="feedback-panel fp-${f.type}">
+      <div class="fp-header">
+        <i class="ti ${f.type==='perfect'?'ti-circle-check':f.type==='ok'?'ti-alert-triangle':'ti-alert-circle'}"></i>
+        ${f.title}
+      </div>
+      <div class="fp-body">${f.body}</div>
+      ${f.tip?`<div class="fp-tip"><b>📌 Conceito-chave:</b> ${f.tip}</div>`:''}
+      ${f.concept?`<div class="fp-concept"><b>💡 Para lembrar:</b> ${f.concept}</div>`:''}
+    </div>`;
+  }
+
+  const canNext = sel !== undefined;
+  const isLast = currentStepIdx === challenge.steps.length - 1;
+
+  return `
+  <div class="game-header">
+    <i class="ti ${challenge.icon} gh-icon" style="color:var(--amber-t)"></i>
+    <div class="gh-info">
+      <div class="gh-title">${challenge.title}</div>
+      <div class="gh-req">${challenge.subtitle}</div>
+    </div>
+    <div class="score-badge">
+      <div class="sb-num">${totalScore}</div>
+      <div class="sb-lbl">Pontos</div>
+    </div>
+    <button class="btn" onclick="backToLobby()" style="margin-left:4px;padding:8px 10px">
+      <i class="ti ti-x"></i>
+    </button>
+  </div>
+
+  <div class="step-trail">${trailHtml}</div>
+
+  <div class="game-layout">
+    <div class="game-panel">
+      <div class="gp-title"><i class="ti ${getStepIcon(key)}"></i>${getStepLabel(key)}</div>
+      <div class="gp-subtitle">${challenge.tips[key]||''}</div>
+      <div class="comp-grid">
+        ${items.map(c=>`
+        <div class="comp-card ${sel===c.id?'selected':''} ${fb?'locked-sel':''}" onclick="selectComp('${key}','${c.id}')">
+          <div class="chk"><i class="ti ti-check"></i></div>
+          <div class="tier-tag ${c.tier}">${c.tag||c.tier}</div><br>
+          <div class="comp-icon"><i class="ti ${c.icon}"></i></div>
+          <div class="comp-name">${c.name}</div>
+          <div class="comp-spec">${c.specs.replace(/\n/g,'<br>')}</div>
+        </div>`).join('')}
+      </div>
+      ${feedbackHtml}
+      <div class="nav-btns">
+        <button class="btn" onclick="prevStep()" ${currentStepIdx===0?'disabled':''}>
+          <i class="ti ti-arrow-left"></i>Anterior
+        </button>
+        ${isLast
+          ? `<button class="btn btn-p" onclick="finishChallenge()" ${!canNext?'disabled':''}>
+              <i class="ti ti-trophy"></i>Ver Resultado
+             </button>`
+          : `<button class="btn btn-p" onclick="nextStep()" ${!canNext?'disabled':''}>
+              Próximo<i class="ti ti-arrow-right"></i>
+             </button>`
+        }
+      </div>
+    </div>
+
+    <div class="side-panel">
+      <div class="sp-title"><i class="ti ti-target"></i>Requisitos do Desafio</div>
+      <div class="req-list">${reqsHtml}</div>
+      <div class="divider"></div>
+      <div class="sp-title"><i class="ti ti-list-check"></i>Componentes escolhidos</div>
+      <div class="build-list">${buildHtml||'<div style="font-size:11px;color:var(--text3);padding:4px">Nenhum componente selecionado ainda.</div>'}</div>
+      ${maxScore>0?`
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;color:var(--text2)">Pontuação parcial</span>
+        <span style="font-size:13px;font-weight:700;color:${totalScore/maxScore>=.8?'var(--green-t)':totalScore/maxScore>=.5?'var(--amber-t)':'var(--red-t)'}">${totalScore}/${maxScore}</span>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+
+function checkReq(reqId) {
+  const ch = challenge.id;
+  const g = (k) => selections[k];
+  if(ch==='escritorio') {
+    if(reqId==='cpu_ok') return g('cpu')?['i3','i5','r5'].includes(g('cpu')):null;
+    if(reqId==='igpu_ok') return g('gpu')?g('gpu')==='igpu':null;
+    if(reqId==='ssd_ok') return g('storage')?['ssd500','ssd1tb','nvme1','nvme2','nvmeg5'].includes(g('storage')):null;
+    if(reqId==='ram_ok') return g('ram')?!g('ram').includes('8ddr'):null;
+    if(reqId==='psu_ok') return g('psu')?['550g','650g','850g','1000p'].includes(g('psu')):null;
+  }
+  if(ch==='gamer1080') {
+    if(reqId==='cpu_ok') return g('cpu')?['r5','r7','i5','i7'].includes(g('cpu')):null;
+    if(reqId==='gpu_ok') return g('gpu')?['rtx3060','rx7700','rtx4070'].includes(g('gpu')):null;
+    if(reqId==='nvme_ok') return g('storage')?g('storage').startsWith('nvme'):null;
+    if(reqId==='ram_ok') return g('ram')?['16ddr4','16ddr5','32ddr5'].includes(g('ram')):null;
+    if(reqId==='psu_ok') return g('psu')?['650g','850g','sfx650'].includes(g('psu')):null;
+  }
+  if(ch==='edicao4k') {
+    if(reqId==='cpu_ok') return g('cpu')?['r9','i9','r7'].includes(g('cpu')):null;
+    if(reqId==='gpu_ok') return g('gpu')?['rtx4080','rtx4090'].includes(g('gpu')):null;
+    if(reqId==='nvme_ok') return g('storage')?['nvme2','nvmeg5'].includes(g('storage')):null;
+    if(reqId==='ram_ok') return g('ram')?['32ddr5','64ddr5'].includes(g('ram')):null;
+    if(reqId==='psu_ok') return g('psu')?['850g','1000p'].includes(g('psu')):null;
+  }
+  if(ch==='nas') {
+    if(reqId==='cpu_ok') return g('cpu')?['i3','r5'].includes(g('cpu')):null;
+    if(reqId==='hd_ok') return g('storage')?['hd2tb','hd4tb'].includes(g('storage')):null;
+    if(reqId==='raid_ok') return g('storage')?['hd4tb','hd2tb'].includes(g('storage')):null;
+    if(reqId==='ram_ok') return g('ram')?['16ddr4','16ddr5','32ddr5'].includes(g('ram')):null;
+    if(reqId==='psu_ok') return g('psu')?['550g','650g'].includes(g('psu')):null;
+  }
+  if(ch==='miniitx') {
+    if(reqId==='itx_ok') return g('case')?['itxcase','meshitx'].includes(g('case')):null;
+    if(reqId==='sfx_ok') return g('psu')?g('psu')==='sfx650':null;
+    if(reqId==='cooler_ok') return g('cpu')?['i3','r5','r7','i5'].includes(g('cpu')):null;
+    if(reqId==='gpu_ok') return g('gpu')?['igpu','rtx3060','rtx4070'].includes(g('gpu')):null;
+    if(reqId==='case_ok') return g('case')?['itxcase','meshitx'].includes(g('case')):null;
+  }
+  return null;
+}
+
+function getFeedback(key, selId) {
+  const ch = challenge.id;
+  if(FEEDBACK[ch] && FEEDBACK[ch][key] && FEEDBACK[ch][key][selId]) return FEEDBACK[ch][key][selId];
+  // fallback genérico baseado na pontuação
+  const sc = scores[key]||0;
+  const item = (COMPS[key]||[]).find(x=>x.id===selId);
+  if(sc>=80) return {type:'perfect',title:'Excelente escolha!',body:`<strong>${item?.name}</strong> é uma ótima escolha para este cenário. Ela atende bem aos requisitos de ${challenge.title}.`,tip:challenge.tips[key]||''};
+  if(sc>=50) return {type:'ok',title:'Escolha razoável.',body:`<strong>${item?.name}</strong> funciona neste contexto, mas existe uma opção mais adequada para ${challenge.title}. Releia os requisitos do desafio e considere as especificações de cada componente.`,tip:challenge.tips[key]||''};
+  return {type:'bad',title:'Escolha inadequada para este cenário.',body:`<strong>${item?.name}</strong> não é ideal para ${challenge.title}. Considere as necessidades reais deste perfil de uso antes de escolher um componente.`,tip:challenge.tips[key]||''};
+}
+
+function selectComp(key, id) {
+  if(feedbackShown[key]) return;
+  selections[key] = id;
+  const sc = SCORING[challenge.id]?.[key]?.[id]??50;
+  scores[key] = sc;
+  feedbackShown[key] = true;
+  render();
+}
+
+function goStep(i) { currentStepIdx = i; render(); }
+function prevStep() { if(currentStepIdx>0){ currentStepIdx--; render(); } }
+function nextStep() { if(currentStepIdx<challenge.steps.length-1){ currentStepIdx++; render(); } }
+function backToLobby() { screen='lobby'; render(); }
+
+function finishChallenge() {
+  const totalScore = Object.values(scores).reduce((a,b)=>a+b,0);
+  saveProgress(challenge.id, totalScore);
+  // detectar se desbloqueou o próximo
+  const idx = CHALLENGES.findIndex(c=>c.id===challenge.id);
+  if(totalScore >= UNLOCK_MIN && idx < CHALLENGES.length-1) {
+    const next = CHALLENGES[idx+1];
+    const p = loadProgress();
+    // só notifica se o próximo não estava desbloqueado antes desta tentativa
+    const prevBest = p[challenge.id] - totalScore; // antes de salvar
+    if(prevBest < UNLOCK_MIN) justUnlocked = next;
+  }
+  screen = 'result';
+  render();
+}
+
+function renderResult() {
+  const totalScore = Object.values(scores).reduce((a,b)=>a+b,0);
+  const maxScore = challenge.steps.length * 100;
+  const pct = Math.round(totalScore/maxScore*100);
+  const passed = totalScore >= UNLOCK_MIN;
+
+  const label = pct>=90?{l:'Mestre do Hardware!',c:'var(--purple-t)',icon:'ti-crown'}
+               :pct>=75?{l:'Técnico Qualificado',c:'var(--green-t)',icon:'ti-medal'}
+               :pct>=55?{l:'Em Desenvolvimento',c:'var(--amber-t)',icon:'ti-school'}
+               :        {l:'Continue Estudando',c:'var(--red-t)',icon:'ti-book'};
+
+  const sub = passed
+    ? 'Você atingiu a pontuação mínima e desbloqueou o próximo desafio!'
+    : `Você precisa de <strong>${UNLOCK_MIN} pontos</strong> para desbloquear o próximo nível. Você fez ${totalScore} pts — tente novamente!`;
+
+  const lessons = [];
+  challenge.steps.forEach(k => {
+    const sc = scores[k]||0;
+    if(sc < 60 && challenge.tips[k]) lessons.push({key:k, tip:challenge.tips[k]});
+  });
+
+  const bkCards = challenge.steps.map(k => {
+    const item = (COMPS[k]||[]).find(x=>x.id===selections[k]);
+    const sc = scores[k]||0;
+    const colors=['blue','green','amber','purple','teal','coral'];
+    const col = colors[challenge.steps.indexOf(k)%colors.length];
+    return `<div class="bk-card ${col}">
+      <div class="bk-icon"><i class="ti ${getStepIcon(k)}" style="font-size:20px;color:var(--${col}-t)"></i></div>
+      <div class="bk-name">${getStepLabel(k)}</div>
+      <div class="bk-val">${item?.name?.split(' ').slice(0,3).join(' ')||'—'}</div>
+      <div class="bk-pts" style="color:${sc>=80?'var(--green-t)':sc>=50?'var(--amber-t)':'var(--red-t)'}">${sc}/100 pts</div>
+    </div>`;
+  }).join('');
+
+  // barra de pontuação mínima
+  const barFill = Math.min(100, Math.round(totalScore/maxScore*100));
+  const minLinePct = Math.round(UNLOCK_MIN/maxScore*100);
+  const barColor = totalScore >= UNLOCK_MIN ? 'var(--green)' : totalScore >= UNLOCK_MIN*0.8 ? 'var(--amber)' : 'var(--red)';
+
+  const unlockToast = justUnlocked ? `
+  <div class="unlock-toast">
+    <i class="ti ti-lock-open ut-icon"></i>
+    <div class="ut-text">
+      <h4>🎉 Novo desafio desbloqueado!</h4>
+      <p><strong>${justUnlocked.title}</strong> (${justUnlocked.diffLabel}) está disponível agora. Continue aprendendo!</p>
+    </div>
+  </div>` : '';
+
+  const notPassedWarning = !passed ? `
+  <div style="background:var(--amber-d);border:1px solid #4a3010;border-radius:var(--rl);padding:12px 16px;margin-bottom:1.5rem;display:flex;align-items:center;gap:10px">
+    <i class="ti ti-lock" style="font-size:22px;color:var(--amber-t)"></i>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--amber-t);margin-bottom:2px">Próximo desafio ainda bloqueado</div>
+      <div style="font-size:11px;color:var(--text2)">Você precisa de <strong>${UNLOCK_MIN} pontos</strong> para desbloquear. Faltam <strong style="color:var(--amber-t)">${UNLOCK_MIN - totalScore} pts</strong>. Revise os conceitos abaixo e tente de novo!</div>
+    </div>
+  </div>` : '';
+
+  return `<div class="result-wrap">
+  ${unlockToast}
+  ${notPassedWarning}
+  <div class="result-score-big">
+    <div style="font-size:36px;margin-bottom:8px"><i class="ti ${label.icon}" style="color:${label.c}"></i></div>
+    <div class="rsb-num" style="color:${label.c}">${totalScore}<span class="rsb-max">/${maxScore}</span></div>
+    <div class="rsb-label" style="color:${label.c}">${label.l}</div>
+    <div class="rsb-sub">${sub}</div>
+    <div style="margin-top:14px;max-width:360px;margin-left:auto;margin-right:auto">
+      <div style="position:relative;height:10px;background:var(--bg4);border-radius:5px;overflow:visible">
+        <div style="height:100%;width:${barFill}%;background:${barColor};border-radius:5px;transition:width .5s"></div>
+        <div style="position:absolute;top:-4px;left:${minLinePct}%;width:2px;height:18px;background:var(--amber-t);border-radius:1px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:4px;color:var(--text3)">
+        <span>0</span>
+        <span style="color:var(--amber-t)">▲ mínimo ${UNLOCK_MIN}</span>
+        <span>${maxScore}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="breakdown-grid">${bkCards}</div>
+
+  ${lessons.length>0?`
+  <div class="lesson-box">
+    <div class="lb-title"><i class="ti ti-book-open"></i>Pontos para revisar na apostila</div>
+    ${lessons.map(l=>`<div class="lb-item">
+      <i class="ti ${getStepIcon(l.key)}"></i>
+      <span><b>${getStepLabel(l.key)}:</b> ${l.tip}</span>
+    </div>`).join('')}
+  </div>`:
+  `<div class="lesson-box">
+    <div class="lb-title"><i class="ti ti-circle-check"></i>Parabéns — nenhum ponto crítico para revisão!</div>
+    <div class="lb-item"><i class="ti ti-star"></i><span>Suas escolhas demonstram boa compreensão dos conceitos de hardware para este cenário. Tente os desafios mais difíceis!</span></div>
+  </div>`}
+
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:1rem;flex-wrap:wrap">
+    <button class="btn btn-p" onclick="startChallenge('${challenge.id}')">
+      <i class="ti ti-refresh"></i>Tentar Novamente
+    </button>
+    <button class="btn" onclick="backToLobby()">
+      <i class="ti ti-layout-grid"></i>Outros Desafios
+    </button>
+  </div>
+</div>`;
+}
+
+function confirmReset() {
+  if(confirm('Resetar todo o progresso? Todos os desafios voltarão a ser bloqueados.')) {
+    resetProgress();
+    render();
+  }
+}
+
+window.startChallenge = startChallenge;
+window.selectComp = selectComp;
+window.goStep = goStep;
+window.prevStep = prevStep;
+window.nextStep = nextStep;
+window.backToLobby = backToLobby;
+window.finishChallenge = finishChallenge;
+window.confirmReset = confirmReset;
+
+render();
+</script>
+</body>
+</html>

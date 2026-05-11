@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revisão — Prof. Renan Matheus</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080b0f;--bg2:#0e1118;--bg3:#141820;--border:#1c2230;--accent:#00e5ff;--accent2:#ff6b35;--accent3:#39ff14;--warn:#ffd166;--text:#bcc8d8;--dim:#5a6a7e;--bright:#eaf2ff;--mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.75;overflow-x:hidden;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.055)3px,rgba(0,0,0,0.055)4px);pointer-events:none;z-index:9999}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(8,11,15,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:54px;gap:1rem}
+.nav-logo{font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:3px;text-transform:uppercase;white-space:nowrap}
+.nav-logo span{color:var(--accent2)}
+.nav-info{font-family:var(--mono);font-size:.62rem;color:var(--dim);letter-spacing:1.5px;display:flex;align-items:center;gap:1.5rem;white-space:nowrap}
+.nav-pill{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);color:var(--accent);padding:.2rem .7rem;font-size:.6rem;letter-spacing:1.5px;transition:all .3s}
+.nav-pill.hidden{opacity:0}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:92vh;display:flex;flex-direction:column;justify-content:flex-end;padding:5rem 3rem 4rem;overflow:hidden;border-bottom:1px solid var(--border)}
+.hero-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,.025)1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025)1px,transparent 1px);background-size:52px 52px;animation:gridscroll 40s linear infinite}
+@keyframes gridscroll{to{background-position:0 104px}}
+.hero-glow{position:absolute;width:1000px;height:1000px;background:radial-gradient(circle,rgba(0,229,255,.05)0%,transparent 65%);top:-400px;right:-200px;pointer-events:none}
+.hero-glow2{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(255,107,53,.045)0%,transparent 65%);bottom:-150px;left:5%;pointer-events:none}
+.hero-eyebrow{position:relative;display:inline-flex;align-items:center;gap:.8rem;font-family:var(--mono);font-size:.65rem;color:var(--accent2);letter-spacing:4px;text-transform:uppercase;margin-bottom:2rem}
+.hero-eyebrow::before{content:'';width:36px;height:1px;background:var(--accent2)}
+.blink{animation:blink .85s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.hero-title{position:relative;font-family:var(--cond);font-size:clamp(2.8rem,8vw,7.5rem);font-weight:900;line-height:.88;color:var(--bright);text-transform:uppercase;letter-spacing:-2px;margin-bottom:1rem}
+.hero-title .c1{color:var(--accent)}
+.hero-title .c2{color:var(--accent2)}
+.hero-subtitle{position:relative;font-size:1rem;color:var(--dim);max-width:540px;margin-top:1.5rem;margin-bottom:3rem;font-weight:300;line-height:1.9}
+.hero-meta{display:flex;gap:2.5rem;flex-wrap:wrap;position:relative}
+.hstat{border-left:2px solid var(--accent);padding-left:1rem}
+.hstat-v{font-family:var(--mono);font-size:2rem;color:var(--accent);display:block;line-height:1}
+.hstat-l{font-size:.65rem;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-top:.3rem;display:block}
+.hero-scroll{position:absolute;bottom:2.5rem;right:3rem;font-family:var(--mono);font-size:.58rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;writing-mode:vertical-lr;display:flex;align-items:center;gap:.75rem}
+.hero-scroll::before{content:'';width:1px;height:56px;background:linear-gradient(to bottom,var(--accent),transparent)}
+.luck-banner{position:relative;margin-top:2.5rem;display:inline-flex;align-items:center;gap:1rem;padding:1rem 1.5rem;border:1px solid rgba(0,229,255,.2);background:rgba(0,229,255,.04);font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
+.luck-banner::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent)}
+
+/* ── PROGRESS ── */
+.progress-outer{background:var(--bg3);border-bottom:1px solid var(--border);padding:1.25rem 3rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;position:sticky;top:54px;z-index:100;backdrop-filter:blur(10px);background:rgba(14,17,24,.95)}
+.progress-track{flex:1;min-width:180px;height:5px;background:var(--bg);border:1px solid var(--border);border-radius:0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s ease;border-radius:0}
+.prog-text{font-family:var(--mono);font-size:.62rem;color:var(--dim);letter-spacing:1.5px;white-space:nowrap}
+.prog-text strong{color:var(--accent)}
+.cat-badges{display:flex;gap:.6rem;flex-wrap:wrap}
+.cat-badge{font-family:var(--mono);font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;padding:.2rem .6rem;border:1px solid;opacity:.4;transition:opacity .3s}
+.cat-badge.hw{border-color:var(--accent);color:var(--accent)}
+.cat-badge.net{border-color:var(--warn);color:var(--warn)}
+.cat-badge.logic{border-color:var(--accent3);color:var(--accent3)}
+.cat-badge.active{opacity:1}
+
+/* ── QUIZ WRAP ── */
+.quiz-wrap{max-width:800px;margin:0 auto;padding:3rem 2rem 6rem}
+
+/* ── QUESTION CARD ── */
+.qcard{background:var(--bg2);border:1px solid var(--border);margin-bottom:2.5rem;position:relative;overflow:hidden;animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.qcard-header{padding:1.5rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:1.25rem}
+.qnum{font-family:var(--mono);font-size:2.4rem;color:rgba(0,229,255,.1);font-weight:900;line-height:1;flex-shrink:0;min-width:50px}
+.qmeta{flex:1}
+.qtopic{font-family:var(--mono);font-size:.56rem;color:var(--accent2);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:.4rem;display:flex;align-items:center;gap:.75rem}
+.qtopic-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.hw-dot{background:var(--accent)}
+.net-dot{background:var(--warn)}
+.logic-dot{background:var(--accent3)}
+.qtext{font-size:1rem;font-weight:600;color:var(--bright);line-height:1.55}
+.qbody{padding:1.5rem 2rem}
+
+/* ── ATTEMPTS ── */
+.attempt-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.attempt-label{font-family:var(--mono);font-size:.6rem;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase}
+.attempt-dots{display:flex;gap:.4rem}
+.adot{width:10px;height:10px;border:1px solid var(--border);background:var(--bg3);transition:all .3s;border-radius:50%}
+.adot.used-wrong{background:var(--accent2);border-color:var(--accent2)}
+.adot.used-right{background:var(--accent3);border-color:var(--accent3)}
+
+/* ── OPTIONS ── */
+.options{display:flex;flex-direction:column;gap:.65rem}
+.option{display:flex;align-items:flex-start;gap:1rem;padding:.9rem 1.2rem;border:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:all .2s;position:relative;overflow:hidden;user-select:none}
+.option:hover:not(.locked){border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.03)}
+.opt-l{font-family:var(--mono);font-size:.66rem;color:var(--dim);width:24px;min-width:24px;height:24px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;letter-spacing:1px;transition:all .2s;flex-shrink:0;margin-top:.1rem}
+.opt-t{font-size:.9rem;color:var(--text);flex:1;line-height:1.5}
+.option:hover:not(.locked) .opt-l{border-color:var(--accent);color:var(--accent)}
+.option.selected{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05)}
+.option.selected .opt-l{border-color:var(--accent);background:var(--accent);color:#000}
+.option.correct-anim{border-color:rgba(57,255,20,.55)!important;background:rgba(57,255,20,.07)!important;animation:correctPulse .4s ease}
+@keyframes correctPulse{0%{transform:scale(1)}50%{transform:scale(1.01)}100%{transform:scale(1)}}
+.option.correct-anim .opt-l{border-color:var(--accent3)!important;background:var(--accent3)!important;color:#000!important}
+.option.correct-anim .opt-t{color:var(--bright)!important}
+.option.wrong-anim{border-color:rgba(255,107,53,.5)!important;background:rgba(255,107,53,.06)!important;animation:wrongShake .3s ease}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.option.wrong-anim .opt-l{border-color:var(--accent2)!important;background:var(--accent2)!important;color:#fff!important}
+.option.locked{cursor:default}
+.option.locked:not(.correct-anim):not(.wrong-anim){opacity:.45}
+.opt-icon{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);font-size:.9rem;opacity:0;transition:opacity .2s}
+.option.correct-anim .opt-icon,.option.wrong-anim .opt-icon{opacity:1}
+
+/* ── CONFIRM BTN ── */
+.confirm-btn{margin-top:1.25rem;font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;padding:.72rem 1.75rem;background:transparent;border:1px solid rgba(0,229,255,.3);color:var(--accent);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.75rem}
+.confirm-btn:hover:not(:disabled){background:var(--accent);color:#000;border-color:var(--accent)}
+.confirm-btn:disabled{opacity:.3;cursor:default}
+
+/* ── FEEDBACK ── */
+.toast{margin-top:1rem;padding:.9rem 1.2rem;border-left:3px solid;display:none;animation:fadeIn .25s ease;font-size:.85rem}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.toast.show{display:flex;align-items:flex-start;gap:.75rem}
+.toast.t-ok{border-color:var(--accent3);background:rgba(57,255,20,.05);color:var(--bright)}
+.toast.t-err{border-color:var(--accent2);background:rgba(255,107,53,.05);color:var(--text)}
+.toast.t-warn{border-color:var(--warn);background:rgba(255,209,102,.05);color:var(--text)}
+.toast-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
+.toast-msg{flex:1;line-height:1.6}
+.toast-msg strong{display:block;font-family:var(--mono);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:.3rem}
+
+/* ── REVELATION BOX ── */
+.reveal-box{margin-top:1.25rem;padding:1.25rem 1.4rem;border:1px solid rgba(255,209,102,.3);background:rgba(255,209,102,.04);display:none;animation:fadeIn .3s ease}
+.reveal-box.show{display:block}
+.reveal-title{font-family:var(--mono);font-size:.6rem;color:var(--warn);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem}
+.reveal-title::before{content:'';width:20px;height:1px;background:var(--warn)}
+.reveal-answer{font-size:.92rem;color:var(--bright);font-weight:600;margin-bottom:.5rem}
+.reveal-explain{font-size:.85rem;color:var(--text);line-height:1.7}
+.reveal-explain code{font-family:var(--mono);font-size:.78rem;background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.2);color:var(--warn);padding:.1rem .4rem}
+
+/* ── SECTION DIVIDER ── */
+.section-sep{border:none;height:1px;background:var(--border);margin:3rem 0}
+.section-label{font-family:var(--mono);font-size:.65rem;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:2rem;display:flex;align-items:center;gap:1rem}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.section-label .sl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── RESULTS ── */
+#results-screen{display:none;padding:0 2rem 6rem;max-width:800px;margin:0 auto;animation:fadeUp .5s ease}
+.result-hero{padding:4rem 2rem 3rem;text-align:center;border:1px solid var(--border);background:var(--bg2);position:relative;overflow:hidden;margin-bottom:2px}
+.result-hero::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3))}
+.result-grade{font-family:var(--mono);font-size:6rem;line-height:1;margin:1.5rem 0 .5rem;display:block}
+.result-grade .denom{font-size:2.5rem;color:var(--dim)}
+.result-verdict{font-family:var(--cond);font-size:2rem;font-weight:900;text-transform:uppercase;margin-bottom:.75rem}
+.result-msg{font-size:.95rem;color:var(--dim);max-width:420px;margin:0 auto}
+.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5px;background:var(--border);margin-bottom:2px}
+.rstat{background:var(--bg2);padding:1.5rem 1rem;text-align:center}
+.rstat-v{font-family:var(--mono);font-size:1.8rem;display:block;line-height:1;margin-bottom:.3rem}
+.rstat-l{font-size:.62rem;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;display:block}
+.rv-ok{color:var(--accent3)}
+.rv-err{color:var(--accent2)}
+.rv-note{color:var(--accent)}
+.rv-pct{color:var(--warn)}
+.result-actions{display:flex;gap:1.5px;background:var(--border)}
+.action-btn{flex:1;font-family:var(--mono);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;padding:1.1rem 1.5rem;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.75rem}
+.btn-restart{background:var(--bg2);color:var(--accent2)}
+.btn-restart:hover{background:var(--accent2);color:#fff}
+.btn-print{background:var(--bg2);color:var(--accent)}
+.btn-print:hover{background:var(--accent);color:#000}
+
+/* ── GRADE COLOR ── */
+.grade-fail{color:var(--accent2)}
+.grade-pass{color:var(--warn)}
+.grade-good{color:var(--accent3)}
+
+/* ── GABARITO FINAL (screen) ── */
+#gabarito-final{margin-top:2px;background:var(--bg2);border:1px solid var(--border);display:none}
+#gabarito-final.show{display:block}
+.gab-header{padding:1.5rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.25rem;background:var(--bg3)}
+.gab-header-title{font-family:var(--cond);font-size:1.5rem;font-weight:900;text-transform:uppercase;color:var(--bright);letter-spacing:.5px}
+.gab-header-sub{font-family:var(--mono);font-size:.6rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:.2rem}
+.gab-legend{display:flex;gap:1.5rem;margin-left:auto;flex-shrink:0}
+.gab-leg-item{font-family:var(--mono);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.gleg-ok{color:#39ff14}
+.gleg-err{color:var(--accent2)}
+.gab-list{padding:0}
+.gab-item{display:grid;grid-template-columns:auto 1fr auto;gap:0;border-bottom:1px solid var(--border);align-items:stretch;transition:background .2s}
+.gab-item:last-child{border-bottom:none}
+.gab-item:hover{background:var(--bg3)}
+.gab-item.gab-correct{border-left:3px solid #39ff14}
+.gab-item.gab-wrong{border-left:3px solid var(--accent2)}
+.gab-idx{padding:1.1rem 1.25rem;border-right:1px solid var(--border);font-family:var(--mono);font-size:.65rem;color:var(--dim);display:flex;align-items:flex-start;justify-content:center;min-width:52px;padding-top:1.2rem}
+.gab-content{padding:1rem 1.5rem;flex:1}
+.gab-qtext{font-size:.88rem;color:var(--bright);font-weight:600;line-height:1.5;margin-bottom:.7rem}
+.gab-answers{display:flex;flex-wrap:wrap;gap:.5rem}
+.gab-ans-pill{font-family:var(--mono);font-size:.68rem;padding:.28rem .75rem;border:1px solid;display:inline-flex;align-items:center;gap:.4rem;letter-spacing:.5px}
+.gab-ans-pill.pill-student-ok{background:rgba(57,255,20,.1);border-color:rgba(57,255,20,.35);color:#39ff14}
+.gab-ans-pill.pill-student-err{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.35);color:var(--accent2);text-decoration:line-through;opacity:.75}
+.gab-ans-pill.pill-correct{background:rgba(57,255,20,.08);border-color:rgba(57,255,20,.3);color:#39ff14}
+.gab-ans-pill.pill-correct-highlight{background:rgba(57,255,20,.15);border-color:#39ff14;color:#39ff14;font-weight:700}
+.gab-status{padding:1rem 1.5rem;display:flex;align-items:center;justify-content:center;min-width:54px;border-left:1px solid var(--border)}
+.gab-icon{font-size:1.4rem;line-height:1}
+.gab-explain-toggle{font-family:var(--mono);font-size:.58rem;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:.5rem;display:inline-flex;align-items:center;gap:.4rem;user-select:none;border:none;background:none;padding:0}
+.gab-explain-toggle:hover{color:var(--bright)}
+.gab-explain-text{font-size:.82rem;color:var(--text);line-height:1.65;margin-top:.6rem;padding:.75rem 1rem;border-left:2px solid rgba(0,229,255,.2);background:rgba(0,229,255,.03);display:none}
+.gab-explain-text.open{display:block;animation:fadeIn .2s ease}
+.gab-explain-text code{font-family:var(--mono);font-size:.76rem;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.15);color:var(--accent);padding:.1rem .35rem}
+.gab-cat-sep{padding:.6rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.58rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:.75rem}
+.gab-cat-sep .gcs-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── PRINT STYLES ── */
+@media print{
+  body::before{display:none}
+  nav,.progress-outer,.hero,.result-actions,.no-print{display:none!important}
+  body{background:#fff;color:#000;font-size:12px}
+  :root{--bg:#fff;--bg2:#fafafa;--bg3:#f2f2f2;--border:#ddd;--text:#333;--bright:#000;--dim:#666;--accent:#0066cc;--accent2:#cc3300;--accent3:#007a00;--warn:#996600}
+  .quiz-wrap{display:none!important}
+  #results-screen{display:block!important;padding:0;margin:0;max-width:100%}
+  .result-hero{page-break-inside:avoid;border:1px solid #ccc}
+  .result-hero::before{display:none}
+  .result-grade{font-size:3.5rem}
+  footer{display:none}
+  .print-header{display:block!important;text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #000}
+  .print-header h2{font-size:1.4rem;font-weight:bold;margin-bottom:.2rem}
+  .print-header p{font-size:.82rem;color:#555}
+  /* gabarito print */
+  #gabarito-final{display:block!important;border:1px solid #ccc;margin-top:1rem}
+  .gab-header{background:#f2f2f2;border-bottom:1px solid #ccc;padding:1rem 1.25rem}
+  .gab-header-title{font-size:1.1rem;color:#000}
+  .gab-legend{display:none}
+  .gab-item{page-break-inside:avoid;border-bottom:1px solid #ddd}
+  .gab-item.gab-correct{border-left:3px solid #007a00}
+  .gab-item.gab-wrong{border-left:3px solid #cc3300}
+  .gab-qtext{color:#000;font-size:.82rem}
+  .gab-ans-pill.pill-student-ok{background:#e6ffe6;border-color:#007a00;color:#007a00}
+  .gab-ans-pill.pill-student-err{background:#ffe6e6;border-color:#cc3300;color:#cc3300}
+  .gab-ans-pill.pill-correct-highlight{background:#e6ffe6;border-color:#007a00;color:#007a00}
+  .gab-explain-toggle{display:none}
+  .gab-explain-text{display:block!important;background:#f9f9f9;border-left:2px solid #999;color:#333;font-size:.78rem}
+  .gab-explain-text code{background:#eee;border:1px solid #ccc;color:#333}
+  .gab-cat-sep{background:#eee;border-bottom:1px solid #ccc;color:#444}
+  .gab-idx{color:#888;font-size:.6rem}
+  .gab-status{min-width:44px}
+  .gab-icon{font-size:1.1rem}
+  .result-stats{border:1px solid #ccc}
+  .rstat{border:1px solid #ccc}
+}
+.print-header{display:none}
+
+/* ── FOOTER ── */
+footer{padding:2.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+footer p{font-family:var(--mono);font-size:.62rem;color:var(--dim);letter-spacing:1px}
+footer span{color:var(--accent)}
+
+@media(max-width:700px){
+  .hero{padding:3rem 1.5rem}
+  .hero-title{font-size:3rem}
+  .progress-outer{padding:1rem 1.5rem}
+  .quiz-wrap{padding:2rem 1.25rem 4rem}
+  .qcard-header{padding:1.25rem 1.25rem}
+  .qbody{padding:1.25rem}
+  .result-stats{grid-template-columns:repeat(2,1fr)}
+  .result-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">PROF. <span>RENAN MATHEUS</span></div>
+  <div class="nav-info">
+    <span class="nav-pill hidden" id="nav-pill">Acertos: <strong id="nav-acertos">0</strong>/20</span>
+    <span style="font-size:.58rem">REVISÃO · 2026</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-eyebrow">Revisão Completa &nbsp;<span class="blink">█</span></div>
+  <div class="hero-title">
+    HARDWARE<br>
+    <span class="c1">REDES</span> &amp;<br>
+    <span class="c2">LÓGICA</span>
+  </div>
+  <p class="hero-subtitle">
+    20 questões de múltipla escolha cobrindo fundamentos de hardware, topologias de rede e lógica de programação. As perguntas aparecem embaralhadas a cada tentativa.
+  </p>
+  <div class="hero-meta">
+    <div class="hstat"><span class="hstat-v">20</span><span class="hstat-l">Questões</span></div>
+    <div class="hstat"><span class="hstat-v">2</span><span class="hstat-l">Tentativas por questão</span></div>
+    <div class="hstat"><span class="hstat-v">10</span><span class="hstat-l">Nota máxima</span></div>
+  </div>
+  <div class="luck-banner">
+    🍀 &nbsp; Boa sorte, aluno! Leia cada questão com atenção antes de responder.
+  </div>
+  <div class="hero-scroll">SCROLL</div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-outer" id="prog-outer">
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="prog-text" id="prog-text">0 de 20 respondidas</div>
+  <div class="cat-badges">
+    <div class="cat-badge hw active" id="badge-hw">● Hardware</div>
+    <div class="cat-badge net active" id="badge-net">● Redes</div>
+    <div class="cat-badge logic active" id="badge-logic">● Lógica</div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-wrap" id="quiz-wrap"></div>
+
+<!-- RESULTS -->
+<div id="results-screen">
+  <div class="print-header">
+    <h2>Revisão — Prof. Renan Matheus</h2>
+    <p>Hardware · Redes · Lógica de Programação</p>
+  </div>
+  <div class="result-hero">
+    <div style="font-family:var(--mono);font-size:.6rem;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:.5rem">Resultado Final</div>
+    <span class="result-grade" id="r-grade"><span class="denom">/10</span></span>
+    <div class="result-verdict" id="r-verdict">—</div>
+    <p class="result-msg" id="r-msg">—</p>
+  </div>
+  <div class="result-stats">
+    <div class="rstat"><span class="rstat-v rv-ok" id="r-ok">0</span><span class="rstat-l">Corretas</span></div>
+    <div class="rstat"><span class="rstat-v rv-err" id="r-err">0</span><span class="rstat-l">Incorretas</span></div>
+    <div class="rstat"><span class="rstat-v rv-note" id="r-nota">0.0</span><span class="rstat-l">Nota</span></div>
+    <div class="rstat"><span class="rstat-v rv-pct" id="r-pct">0%</span><span class="rstat-l">Aproveitamento</span></div>
+  </div>
+  <div class="result-actions no-print">
+    <button class="action-btn btn-restart" onclick="restartQuiz()">↺ &nbsp; Tentar Novamente</button>
+    <button class="action-btn btn-print" onclick="window.print()">⎙ &nbsp; Imprimir Resultado</button>
+  </div>
+</div>
+
+<!-- GABARITO FINAL -->
+<div id="gabarito-final">
+  <div class="gab-header">
+    <div>
+      <div class="gab-header-title">Gabarito Completo</div>
+      <div class="gab-header-sub">Todas as questões · respostas do aluno · respostas corretas</div>
+    </div>
+    <div class="gab-legend">
+      <div class="gab-leg-item gleg-ok">✓ &nbsp;Correto</div>
+      <div class="gab-leg-item gleg-err">✗ &nbsp;Incorreto</div>
+    </div>
+  </div>
+  <div class="gab-list" id="gab-list"></div>
+</div>
+
+<footer>
+  <p>Revisão · Prof. <span>Renan Matheus</span> · Hardware, Redes &amp; Lógica</p>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════
+   BANCO DE QUESTÕES
+══════════════════════════════════════════════════ */
+const QUESTIONS = [
+  // ── HARDWARE ──
+  {
+    cat:'hw',catLabel:'Hardware — Fundamentos',
+    text:'Qual componente é responsável por executar instruções e processar dados no computador?',
+    options:[
+      {l:'A',t:'Memória RAM'},
+      {l:'B',t:'HD'},
+      {l:'C',t:'CPU'},
+      {l:'D',t:'Placa-mãe'}
+    ],
+    answer:'C',
+    explain:'A <strong>CPU (Unidade Central de Processamento)</strong> é o "cérebro" do computador. É ela que lê, interpreta e executa as instruções dos programas. A RAM armazena dados temporariamente, o HD armazena permanentemente, e a placa-mãe interliga os componentes — mas quem <em>processa</em> é a CPU.'
+  },
+  {
+    cat:'hw',catLabel:'Hardware — Fundamentos',
+    text:'A memória RAM é classificada como:',
+    options:[
+      {l:'A',t:'Permanente e não volátil'},
+      {l:'B',t:'Volátil e de acesso rápido'},
+      {l:'C',t:'Apenas leitura'},
+      {l:'D',t:'Armazenamento secundário'}
+    ],
+    answer:'B',
+    explain:'A <strong>RAM (Random Access Memory)</strong> é <em>volátil</em> — ao desligar o computador, todos os dados são perdidos. Em compensação, é extremamente rápida, permitindo que o processador acesse dados sem aguardar o HD. O oposto da RAM são os discos (HD/SSD), que são não-voláteis.'
+  },
+  {
+    cat:'hw',catLabel:'Hardware — Fundamentos',
+    text:'Qual é a função da placa-mãe?',
+    options:[
+      {l:'A',t:'Armazenar arquivos do usuário'},
+      {l:'B',t:'Executar cálculos matemáticos'},
+      {l:'C',t:'Interligar e permitir comunicação entre os componentes'},
+      {l:'D',t:'Resfriar o sistema'}
+    ],
+    answer:'C',
+    explain:'A <strong>placa-mãe (motherboard)</strong> é o circuito principal que conecta fisicamente e eletricamente todos os componentes: CPU, RAM, placas de vídeo, armazenamento, entradas USB, etc. Ela fornece os barramentos e slots para que esses componentes se comuniquem entre si.'
+  },
+  {
+    cat:'hw',catLabel:'Hardware — Fundamentos',
+    text:'A BIOS tem como principal função:',
+    options:[
+      {l:'A',t:'Armazenar arquivos do usuário'},
+      {l:'B',t:'Inicializar o hardware e carregar o sistema operacional'},
+      {l:'C',t:'Controlar a internet'},
+      {l:'D',t:'Executar programas gráficos'}
+    ],
+    answer:'B',
+    explain:'A <strong>BIOS (Basic Input/Output System)</strong> é o primeiro software executado ao ligar o computador. Ela realiza o <em>POST</em> (Power-On Self Test) verificando se o hardware está funcionando, configura os dispositivos básicos e então carrega o sistema operacional (Windows, Linux etc.) do disco para a memória RAM.'
+  },
+  {
+    cat:'hw',catLabel:'Hardware — Fundamentos',
+    text:'Qual dispositivo é considerado periférico de entrada?',
+    options:[
+      {l:'A',t:'Monitor'},
+      {l:'B',t:'Impressora'},
+      {l:'C',t:'Teclado'},
+      {l:'D',t:'Caixa de som'}
+    ],
+    answer:'C',
+    explain:'<strong>Periféricos de entrada</strong> enviam dados ao computador. O <em>teclado</em> (e o mouse) são os exemplos clássicos. Monitor e caixa de som são saída (mostram/emitem resultado). A impressora é saída também. Regra: entrada = dados chegando ao computador; saída = dados saindo para o usuário.'
+  },
+  // ── REDES ──
+  {
+    cat:'net',catLabel:'Redes — Topologias',
+    text:'Em qual topologia todos os dispositivos estão conectados a um ponto central?',
+    options:[
+      {l:'A',t:'Barramento'},
+      {l:'B',t:'Anel'},
+      {l:'C',t:'Estrela'},
+      {l:'D',t:'Ponto a ponto'}
+    ],
+    answer:'C',
+    explain:'Na topologia <strong>Estrela</strong>, todos os dispositivos se conectam a um hub ou switch central. Se um dispositivo falhar, apenas ele é afetado. É a topologia mais usada em redes locais modernas por ser fácil de gerenciar e isolar falhas. O ponto central (switch) é o único ponto crítico da rede.'
+  },
+  {
+    cat:'net',catLabel:'Redes — Topologias',
+    text:'Qual topologia utiliza um único cabo compartilhado por todos os dispositivos?',
+    options:[
+      {l:'A',t:'Estrela'},
+      {l:'B',t:'Barramento'},
+      {l:'C',t:'Anel'},
+      {l:'D',t:'Árvore'}
+    ],
+    answer:'B',
+    explain:'Na topologia <strong>Barramento</strong>, todos os dispositivos compartilham um único cabo (backbone). Os dados trafegam pelo cabo e cada dispositivo verifica se a mensagem é para ele. A desvantagem é que se o cabo principal quebrar, toda a rede para. Era comum em redes antigas com cabo coaxial.'
+  },
+  {
+    cat:'net',catLabel:'Redes — Topologias',
+    text:'Na topologia em anel, os dados trafegam:',
+    options:[
+      {l:'A',t:'Em múltiplas direções'},
+      {l:'B',t:'Aleatoriamente'},
+      {l:'C',t:'Em um único sentido'},
+      {l:'D',t:'Apenas por um servidor'}
+    ],
+    answer:'C',
+    explain:'Na topologia <strong>Anel</strong>, os dispositivos formam um círculo fechado e os dados circulam em <em>um único sentido</em> (unidirecional), passando de um nó para o próximo até chegar ao destino. O protocolo Token Ring usava essa topologia. Se um nó falhar, o anel todo pode ser interrompido.'
+  },
+  {
+    cat:'net',catLabel:'Redes — Topologias',
+    text:'A topologia ponto a ponto é caracterizada por:',
+    options:[
+      {l:'A',t:'Uso de servidor central'},
+      {l:'B',t:'Conexão direta entre dois dispositivos'},
+      {l:'C',t:'Uso de cabo coaxial obrigatório'},
+      {l:'D',t:'Comunicação em múltiplos níveis'}
+    ],
+    answer:'B',
+    explain:'A topologia <strong>Ponto a Ponto</strong> é a mais simples: dois dispositivos conectados diretamente entre si, sem intermediários. Exemplo: dois computadores ligados por um cabo de rede diretamente, ou uma conexão VPN entre dois roteadores. Não há servidor central nem outros nós.'
+  },
+  {
+    cat:'net',catLabel:'Redes — Topologias',
+    text:'Qual topologia combina várias redes estrela?',
+    options:[
+      {l:'A',t:'Anel'},
+      {l:'B',t:'Barramento'},
+      {l:'C',t:'Árvore'},
+      {l:'D',t:'Malha'}
+    ],
+    answer:'C',
+    explain:'A topologia <strong>Árvore</strong> (ou hierárquica) combina múltiplas topologias estrela conectadas em hierarquia, como galhos de uma árvore. Há um switch raiz (backbone) ao qual se conectam switches secundários, que por sua vez conectam os dispositivos. É comum em redes corporativas e campi universitários.'
+  },
+  // ── LÓGICA ──
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Em lógica de programação, um algoritmo é:',
+    options:[
+      {l:'A',t:'Um tipo de hardware'},
+      {l:'B',t:'Uma sequência de passos para resolver um problema'},
+      {l:'C',t:'Um programa pronto'},
+      {l:'D',t:'Um banco de dados'}
+    ],
+    answer:'B',
+    explain:'Um <strong>algoritmo</strong> é uma sequência finita, ordenada e não-ambígua de passos para resolver um problema. É a "receita" da solução. O algoritmo existe antes do programa — o programa é apenas a implementação do algoritmo em uma linguagem de programação (Python, Java, etc.).'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Qual estrutura é usada para tomar decisões?',
+    options:[
+      {l:'A',t:'Sequencial'},
+      {l:'B',t:'Repetição'},
+      {l:'C',t:'Condicional'},
+      {l:'D',t:'Vetor'}
+    ],
+    answer:'C',
+    explain:'A estrutura <strong>Condicional</strong> (SE...ENTÃO...SENÃO) permite que o algoritmo tome decisões baseadas em condições verdadeiras ou falsas. Ex: <code>SE nota >= 7 ENTÃO aprovado SENÃO reprovado</code>. A estrutura sequencial executa em ordem. A de repetição repete comandos. Vetores armazenam dados.'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Qual operador é usado para comparação?',
+    options:[
+      {l:'A',t:'←'},
+      {l:'B',t:'+'},
+      {l:'C',t:'='},
+      {l:'D',t:'=='}
+    ],
+    answer:'D',
+    explain:'O operador <strong>==</strong> (duplo igual) é usado para <em>comparar</em> dois valores. O símbolo <code>=</code> simples é atribuição (atribui um valor a uma variável). O <code>←</code> em pseudocódigo também representa atribuição. O <code>+</code> é operador aritmético. Ex: <code>SE x == 10</code> verifica se x é igual a 10.'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Qual será a saída do pseudocódigo abaixo?\n\nINÍCIO\n  x ← 5\n  SE x > 3 ENTÃO\n    ESCREVA "Maior"\n  FIMSE\nFIM',
+    options:[
+      {l:'A',t:'Menor'},
+      {l:'B',t:'Maior'},
+      {l:'C',t:'Erro'},
+      {l:'D',t:'Nada'}
+    ],
+    answer:'B',
+    explain:'Passo a passo: <code>x ← 5</code> → x recebe o valor 5. <code>SE x > 3</code> → verifica se 5 > 3 → <strong>verdadeiro</strong>. Portanto, entra no bloco SE e executa <code>ESCREVA "Maior"</code>. A saída é <strong>"Maior"</strong>. Se x fosse menor ou igual a 3, o bloco seria ignorado e nada seria escrito.'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Um laço de repetição serve para:',
+    options:[
+      {l:'A',t:'Parar o programa'},
+      {l:'B',t:'Executar comandos várias vezes'},
+      {l:'C',t:'Comparar valores'},
+      {l:'D',t:'Criar variáveis'}
+    ],
+    answer:'B',
+    explain:'Um <strong>laço de repetição</strong> (loop) permite que um bloco de comandos seja executado múltiplas vezes sem precisar escrevê-lo repetidamente. Exemplos: <code>ENQUANTO</code> (repete enquanto condição for verdadeira), <code>PARA</code> (repete um número fixo de vezes). Comparar valores é função do condicional SE.'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Qual será o valor de x ao final?\n\nINÍCIO\n  x ← 2\n  x ← x + 3\nFIM',
+    options:[
+      {l:'A',t:'2'},
+      {l:'B',t:'3'},
+      {l:'C',t:'5'},
+      {l:'D',t:'6'}
+    ],
+    answer:'C',
+    explain:'Passo a passo: <code>x ← 2</code> → x vale 2. <code>x ← x + 3</code> → o lado direito é calculado primeiro: 2 + 3 = 5. Depois esse resultado (5) é atribuído a x. Portanto, x termina com o valor <strong>5</strong>. Essa operação é chamada de acumulação ou incremento.'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Qual estrutura repete enquanto a condição for verdadeira?',
+    options:[
+      {l:'A',t:'SE'},
+      {l:'B',t:'PARA'},
+      {l:'C',t:'ENQUANTO'},
+      {l:'D',t:'ESCOLHA'}
+    ],
+    answer:'C',
+    explain:'O laço <strong>ENQUANTO</strong> (while) verifica a condição <em>antes</em> de cada execução. Enquanto a condição for verdadeira, repete o bloco. O PARA repete um número fixo de vezes (de X até Y). O SE é condicional simples, sem repetição. O ESCOLHA é como um switch/case para múltiplas condições.'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Qual será a saída do pseudocódigo?\n\nINÍCIO\n  PARA i DE 1 ATÉ 3 FAÇA\n    ESCREVA i\n  FIMPARA\nFIM',
+    options:[
+      {l:'A',t:'1 2 3'},
+      {l:'B',t:'0 1 2'},
+      {l:'C',t:'1 2'},
+      {l:'D',t:'3 2 1'}
+    ],
+    answer:'A',
+    explain:'O laço <code>PARA i DE 1 ATÉ 3</code> executa com i = 1, depois i = 2, depois i = 3. Em cada iteração, escreve o valor de i. Resultado: <strong>1, 2, 3</strong>. Note que começa em 1 (não em 0), vai até 3 (inclusive), e segue em ordem crescente. Seriam 3 iterações no total.'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Qual será a saída?\n\nINÍCIO\n  x ← 10\n  SE x < 5 ENTÃO\n    ESCREVA "A"\n  SENÃO\n    ESCREVA "B"\n  FIMSE\nFIM',
+    options:[
+      {l:'A',t:'A'},
+      {l:'B',t:'B'},
+      {l:'C',t:'A e B'},
+      {l:'D',t:'Nenhum'}
+    ],
+    answer:'B',
+    explain:'Passo a passo: <code>x ← 10</code>. Verificação: <code>SE x < 5</code> → 10 < 5 → <strong>falso</strong>. Como a condição é falsa, o bloco SE é ignorado e o programa executa o <code>SENÃO</code>, escrevendo <strong>"B"</strong>. A saída é "B". Se x fosse 4 ou menos, a saída seria "A".'
+  },
+  {
+    cat:'logic',catLabel:'Lógica de Programação',
+    text:'Quantas vezes será executado o comando?\n\nINÍCIO\n  x ← 1\n  ENQUANTO x <= 3 FAÇA\n    ESCREVA x\n    x ← x + 1\n  FIMENQUANTO\nFIM',
+    options:[
+      {l:'A',t:'1 vez'},
+      {l:'B',t:'2 vezes'},
+      {l:'C',t:'3 vezes'},
+      {l:'D',t:'4 vezes'}
+    ],
+    answer:'C',
+    explain:'Iteração 1: x = 1 → 1 ≤ 3 ✓ → escreve 1 → x = 2. Iteração 2: x = 2 → 2 ≤ 3 ✓ → escreve 2 → x = 3. Iteração 3: x = 3 → 3 ≤ 3 ✓ → escreve 3 → x = 4. Verificação: x = 4 → 4 ≤ 3 ✗ → para. O comando foi executado <strong>3 vezes</strong>, escrevendo 1, 2 e 3.'
+  }
+];
+
+/* ══════════════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════════════ */
+let shuffled = [];
+let state = {}; // { qIdx: { wrongs, done, correct } }
+let totalDone = 0, totalCorrect = 0;
+
+/* ══════════════════════════════════════════════════
+   SHUFFLE
+══════════════════════════════════════════════════ */
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function shuffleOptions(opts){
+  return shuffle(opts);
+}
+
+/* ══════════════════════════════════════════════════
+   BUILD QUIZ
+══════════════════════════════════════════════════ */
+function buildQuiz(){
+  shuffled = shuffle(QUESTIONS);
+  state = {};
+  shuffled.forEach((_,i)=>{ state[i]={wrongs:0,done:false,correct:false,selOpt:null,lastSubmitted:null}; });
+  totalDone=0; totalCorrect=0;
+  document.getElementById('nav-pill').classList.add('hidden');
+  document.getElementById('progress-fill').style.width='0%';
+  document.getElementById('prog-text').textContent='0 de 20 respondidas';
+  document.getElementById('nav-acertos').textContent='0';
+
+  const wrap = document.getElementById('quiz-wrap');
+  wrap.innerHTML='';
+
+  // Group by category label for section headers
+  let lastCat = null;
+
+  shuffled.forEach((q,i)=>{
+    const shufOpts = shuffleOptions(q.options);
+
+    // Section divider on category change
+    if(q.cat !== lastCat){
+      lastCat = q.cat;
+      const div = document.createElement('div');
+      const colors = {hw:'hw-dot',net:'net-dot',logic:'logic-dot'};
+      const labels = {hw:'Hardware — Fundamentos',net:'Redes — Topologias',logic:'Lógica de Programação'};
+      div.className='section-label';
+      div.innerHTML=`<span class="sl-dot ${colors[q.cat]}"></span>${labels[q.cat]}`;
+      wrap.appendChild(div);
+    }
+
+    const card = document.createElement('div');
+    card.className='qcard';
+    card.id=`qcard-${i}`;
+    card.style.animationDelay = `${i*0.04}s`;
+
+    const dotClass = {hw:'hw-dot',net:'net-dot',logic:'logic-dot'}[q.cat];
+    const catColor = {hw:'var(--accent)',net:'var(--warn)',logic:'var(--accent3)'}[q.cat];
+
+    // Format question text (preserve newlines)
+    const formattedText = q.text.replace(/\n/g,'<br>');
+
+    // Build options HTML
+    const optsHTML = shufOpts.map(opt=>`
+      <div class="option" data-opt="${opt.l}" onclick="selectOpt(${i},'${opt.l}',this)">
+        <div class="opt-l">${opt.l}</div>
+        <div class="opt-t">${opt.t}</div>
+        <div class="opt-icon"></div>
+      </div>
+    `).join('');
+
+    card.innerHTML=`
+      <div class="qcard-header">
+        <div class="qnum">${String(i+1).padStart(2,'0')}</div>
+        <div class="qmeta">
+          <div class="qtopic"><span class="qtopic-dot ${dotClass}"></span>${q.catLabel}</div>
+          <div class="qtext">${formattedText}</div>
+        </div>
+      </div>
+      <div class="qbody">
+        <div class="attempt-row">
+          <span class="attempt-label">Tentativas:</span>
+          <div class="attempt-dots" id="adots-${i}">
+            <div class="adot" id="adot-${i}-0"></div>
+            <div class="adot" id="adot-${i}-1"></div>
+          </div>
+        </div>
+        <div class="options" id="opts-${i}">${optsHTML}</div>
+
+        <div class="toast t-err" id="toast-err-${i}">
+          <div class="toast-icon">✗</div>
+          <div class="toast-msg"><strong>Resposta incorreta</strong>Tente novamente! Você ainda tem <span id="tries-left-${i}">1</span> tentativa.</div>
+        </div>
+        <div class="toast t-warn" id="toast-warn-${i}">
+          <div class="toast-icon">⚠</div>
+          <div class="toast-msg"><strong>Última tentativa!</strong>Pense bem antes de confirmar a próxima resposta.</div>
+        </div>
+        <div class="toast t-ok" id="toast-ok-${i}">
+          <div class="toast-icon">✓</div>
+          <div class="toast-msg"><strong>Correto!</strong>Muito bem! Você acertou essa questão.</div>
+        </div>
+
+        <div class="reveal-box" id="reveal-${i}">
+          <div class="reveal-title">Resposta Revelada — 3 erros atingidos</div>
+          <div class="reveal-answer" id="reveal-ans-${i}"></div>
+          <div class="reveal-explain" id="reveal-exp-${i}"></div>
+        </div>
+
+        <button class="confirm-btn" id="btn-${i}" onclick="confirmAnswer(${i})" disabled>
+          Confirmar Resposta →
+        </button>
+      </div>
+    `;
+
+    wrap.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   SELECT OPTION
+══════════════════════════════════════════════════ */
+function selectOpt(qIdx, optL, el){
+  if(state[qIdx].done) return;
+
+  const container = document.getElementById(`opts-${qIdx}`);
+  container.querySelectorAll('.option').forEach(o=>{
+    o.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  state[qIdx].selOpt = optL;
+  document.getElementById(`btn-${qIdx}`).disabled = false;
+}
+
+/* ══════════════════════════════════════════════════
+   CONFIRM ANSWER
+══════════════════════════════════════════════════ */
+function confirmAnswer(qIdx){
+  const s = state[qIdx];
+  if(s.done || !s.selOpt) return;
+  s.lastSubmitted = s.selOpt; // track what they last confirmed
+
+  const q = shuffled[qIdx];
+  const isRight = s.selOpt === q.answer;
+  const container = document.getElementById(`opts-${qIdx}`);
+  const selEl = container.querySelector(`.option[data-opt="${s.selOpt}"]`);
+
+  // Update attempt dot
+  const dotEl = document.getElementById(`adot-${qIdx}-${s.wrongs}`);
+
+  if(isRight){
+    // ── CORRECT ──
+    s.done = true;
+    s.correct = true;
+    dotEl.classList.add('used-right');
+
+    selEl.classList.remove('selected');
+    selEl.classList.add('correct-anim');
+    selEl.querySelector('.opt-icon').textContent='✓';
+
+    // Lock all
+    container.querySelectorAll('.option').forEach(o=>o.classList.add('locked'));
+
+    // Hide error toasts, show success
+    hideToasts(qIdx);
+    document.getElementById(`toast-ok-${qIdx}`).classList.add('show');
+    document.getElementById(`btn-${qIdx}`).disabled=true;
+    document.getElementById(`btn-${qIdx}`).textContent='✓ Respondida';
+    document.getElementById(`btn-${qIdx}`).style.color='var(--accent3)';
+    document.getElementById(`btn-${qIdx}`).style.borderColor='rgba(57,255,20,.3)';
+
+    totalCorrect++;
+    totalDone++;
+    updateProgress();
+
+  } else {
+    // ── WRONG ──
+    s.wrongs++;
+    dotEl.classList.add('used-wrong');
+
+    selEl.classList.remove('selected');
+    selEl.classList.add('wrong-anim');
+    selEl.querySelector('.opt-icon').textContent='✗';
+    selEl.classList.add('locked');
+
+    // Deselect
+    state[qIdx].selOpt = null;
+    document.getElementById(`btn-${qIdx}`).disabled=true;
+
+    // Restore non-wrong options as selectable after brief delay
+    setTimeout(()=>{
+      container.querySelectorAll('.option:not(.locked)').forEach(o=>{
+        o.classList.remove('selected');
+      });
+    },400);
+
+    hideToasts(qIdx);
+
+    if(s.wrongs >= 2){
+      // ── REVEAL after 2 wrongs ──
+      s.done=true;
+      s.correct=false;
+      container.querySelectorAll('.option').forEach(o=>o.classList.add('locked'));
+
+      // Highlight correct option
+      const correctEl = container.querySelector(`.option[data-opt="${q.answer}"]`);
+      if(correctEl){
+        correctEl.classList.remove('locked','wrong-anim');
+        correctEl.classList.add('correct-anim');
+        correctEl.querySelector('.opt-icon').textContent='✓';
+      }
+
+      // Show revelation
+      const revealEl = document.getElementById(`reveal-${qIdx}`);
+      const ansEl = document.getElementById(`reveal-ans-${qIdx}`);
+      const expEl = document.getElementById(`reveal-exp-${qIdx}`);
+
+      // Find option text for the correct answer
+      const correctOpt = q.options.find(o=>o.l===q.answer);
+      ansEl.innerHTML=`Resposta correta: <span style="color:var(--warn)">Letra ${q.answer}</span> — ${correctOpt.t}`;
+      expEl.innerHTML = q.explain;
+      revealEl.classList.add('show');
+
+      document.getElementById(`btn-${qIdx}`).disabled=true;
+      document.getElementById(`btn-${qIdx}`).textContent='✗ Resolvida';
+      document.getElementById(`btn-${qIdx}`).style.color='var(--accent2)';
+      document.getElementById(`btn-${qIdx}`).style.borderColor='rgba(255,107,53,.3)';
+
+      totalDone++;
+      updateProgress();
+
+    } else {
+      // First error — show remaining tries
+      const errEl = document.getElementById(`toast-err-${qIdx}`);
+      const triesLeft = document.getElementById(`tries-left-${qIdx}`);
+      triesLeft.textContent = 2 - s.wrongs;
+      errEl.classList.add('show');
+    }
+  }
+}
+
+function hideToasts(qIdx){
+  ['toast-err-','toast-warn-','toast-ok-'].forEach(p=>{
+    const el=document.getElementById(p+qIdx);
+    if(el) el.classList.remove('show');
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   PROGRESS
+══════════════════════════════════════════════════ */
+function updateProgress(){
+  const pct = (totalDone/20*100).toFixed(0);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('prog-text').innerHTML=`<strong style="color:var(--accent)">${totalDone}</strong> de 20 respondidas`;
+  document.getElementById('nav-acertos').textContent=totalCorrect;
+  document.getElementById('nav-pill').classList.remove('hidden');
+
+  if(totalDone===20) setTimeout(showResults, 700);
+}
+
+/* ══════════════════════════════════════════════════
+   RESULTS + GABARITO
+══════════════════════════════════════════════════ */
+function showResults(){
+  document.getElementById('quiz-wrap').style.display='none';
+  document.getElementById('prog-outer').style.display='none';
+
+  const nota = (totalCorrect/20*10).toFixed(1);
+  const notaN = parseFloat(nota);
+  const wrong = 20 - totalCorrect;
+  const pct = Math.round(totalCorrect/20*100);
+
+  const gradeClass = notaN < 6 ? 'grade-fail' : notaN <= 8 ? 'grade-pass' : 'grade-good';
+
+  let verdict, msg;
+  if(notaN < 6){
+    verdict='Estude mais!';
+    msg='Sua nota ficou abaixo do mínimo. Revise o conteúdo com atenção e tente novamente. Não desanime — cada erro é uma oportunidade de aprendizado!';
+  } else if(notaN <= 8){
+    verdict='Muito bem, passou por pouco!';
+    msg='Você atingiu a nota mínima para aprovação! Com um pouco mais de dedicação, pode melhorar ainda mais. Revise os pontos em que errou.';
+  } else {
+    verdict='Muito bem, continue assim!';
+    msg='Excelente desempenho! Você domina o conteúdo de hardware, redes e lógica de programação. Continue se dedicando!';
+  }
+
+  document.getElementById('r-grade').innerHTML=`<span class="${gradeClass}">${nota}</span><span class="denom">/10</span>`;
+  document.getElementById('r-verdict').textContent=verdict;
+  document.getElementById('r-verdict').className=`result-verdict ${gradeClass}`;
+  document.getElementById('r-msg').textContent=msg;
+  document.getElementById('r-ok').textContent=totalCorrect;
+  document.getElementById('r-err').textContent=wrong;
+  document.getElementById('r-nota').textContent=nota;
+  document.getElementById('r-pct').textContent=pct+'%';
+
+  // Build gabarito
+  buildGabarito();
+
+  const screen=document.getElementById('results-screen');
+  screen.style.display='block';
+  screen.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ══════════════════════════════════════════════════
+   BUILD GABARITO
+══════════════════════════════════════════════════ */
+function buildGabarito(){
+  const list = document.getElementById('gab-list');
+  list.innerHTML='';
+
+  const catColors = {hw:'var(--accent)',net:'var(--warn)',logic:'var(--accent3)'};
+  const catLabels = {hw:'Hardware — Fundamentos',net:'Redes — Topologias',logic:'Lógica de Programação'};
+  let lastCat = null;
+
+  shuffled.forEach((q, i)=>{
+    const s = state[i];
+    const isOk = s.correct;
+
+    // Category separator
+    if(q.cat !== lastCat){
+      lastCat = q.cat;
+      const sep = document.createElement('div');
+      sep.className='gab-cat-sep';
+      sep.innerHTML=`<span class="gcs-dot" style="background:${catColors[q.cat]}"></span>${catLabels[q.cat]}`;
+      list.appendChild(sep);
+    }
+
+    // Find the correct option text
+    const correctOpt = q.options.find(o=>o.l===q.answer);
+
+    // Student's final submitted answer (last one they confirmed)
+    const studentAns = s.lastSubmitted;
+    const studentOpt = studentAns ? q.options.find(o=>o.l===studentAns) : null;
+
+    // Short question text (strip pseudocode newlines for display in gabarito)
+    const shortText = q.text.replace(/\n[\s\S]*/,'').trim();
+    const hasPseudocode = q.text.includes('\n');
+
+    // Build row
+    const row = document.createElement('div');
+    row.className=`gab-item ${isOk?'gab-correct':'gab-wrong'}`;
+
+    // Student answer pill
+    let studentPillHTML = '';
+    if(studentOpt){
+      const pillClass = isOk ? 'pill-student-ok' : 'pill-student-err';
+      const icon = isOk ? '✓' : '✗';
+      studentPillHTML=`<span class="gab-ans-pill ${pillClass}">${icon} Letra ${studentAns} — ${studentOpt.t}</span>`;
+    } else {
+      studentPillHTML=`<span class="gab-ans-pill pill-student-err">✗ Não respondeu</span>`;
+    }
+
+    // Correct answer pill (only show separately if student was wrong)
+    let correctPillHTML = '';
+    if(!isOk){
+      correctPillHTML=`<span class="gab-ans-pill pill-correct-highlight">✓ Correta: Letra ${q.answer} — ${correctOpt.t}</span>`;
+    }
+
+    // Pseudocode block
+    const pseudoBlock = hasPseudocode
+      ? `<div style="font-family:var(--mono);font-size:.72rem;color:var(--dim);background:var(--bg);border:1px solid var(--border);padding:.6rem .9rem;margin-top:.4rem;white-space:pre;line-height:1.6;overflow-x:auto">${q.text.substring(q.text.indexOf('\n')+1).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : '';
+
+    const expId=`gexp-${i}`;
+
+    row.innerHTML=`
+      <div class="gab-idx">${String(i+1).padStart(2,'0')}</div>
+      <div class="gab-content">
+        <div class="gab-qtext">${shortText}${pseudoBlock}</div>
+        <div class="gab-answers">
+          ${studentPillHTML}
+          ${correctPillHTML}
+        </div>
+        <button class="gab-explain-toggle no-print" onclick="toggleExplain('${expId}',this)">
+          [+] Ver explicação
+        </button>
+        <div class="gab-explain-text" id="${expId}">${q.explain}</div>
+      </div>
+      <div class="gab-status">
+        <span class="gab-icon">${isOk ? '✅' : '❌'}</span>
+      </div>
+    `;
+
+    list.appendChild(row);
+  });
+
+  document.getElementById('gabarito-final').classList.add('show');
+}
+
+function toggleExplain(id, btn){
+  const el=document.getElementById(id);
+  const open=el.classList.toggle('open');
+  btn.textContent = open ? '[-] Fechar explicação' : '[+] Ver explicação';
+}
+
+/* ══════════════════════════════════════════════════
+   RESTART
+══════════════════════════════════════════════════ */
+function restartQuiz(){
+  document.getElementById('results-screen').style.display='none';
+  document.getElementById('gabarito-final').classList.remove('show');
+  document.getElementById('gab-list').innerHTML='';
+  document.getElementById('quiz-wrap').style.display='';
+  document.getElementById('prog-outer').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(buildQuiz, 300);
+}
+
+/* ══════════════════════════════════════════════════
+   NAV SCROLL HIGHLIGHT
+══════════════════════════════════════════════════ */
+window.addEventListener('scroll',()=>{
+  const heroH = document.querySelector('.hero').offsetHeight;
+  if(window.scrollY > heroH) document.getElementById('nav-pill').classList.remove('hidden');
+});
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+buildQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hardware Avançado — Aula Completa</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080b0f;--bg2:#0e1118;--bg3:#141820;--border:#1c2230;--accent:#00e5ff;--accent2:#ff6b35;--accent3:#39ff14;--warn:#ffd166;--text:#bcc8d8;--dim:#5a6a7e;--bright:#eaf2ff;--mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.75;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06)3px,rgba(0,0,0,0.06)4px);pointer-events:none;z-index:9999}
+nav{position:sticky;top:0;z-index:200;background:rgba(8,11,15,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 2.5rem;display:flex;align-items:center;gap:2rem;height:54px;overflow-x:auto}
+nav::-webkit-scrollbar{height:2px;background:var(--border)}
+nav::-webkit-scrollbar-thumb{background:var(--accent)}
+.nav-logo{font-family:var(--mono);font-size:.72rem;color:var(--accent);white-space:nowrap;letter-spacing:3px;text-transform:uppercase;margin-right:1rem}
+.nav-logo span{color:var(--accent2)}
+nav a{font-family:var(--mono);font-size:.62rem;color:var(--dim);text-decoration:none;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;transition:color .2s;padding:.25rem 0}
+nav a:hover{color:var(--accent)}
+.hero{position:relative;min-height:96vh;display:flex;flex-direction:column;justify-content:flex-end;padding:5rem 3rem;overflow:hidden;border-bottom:1px solid var(--border)}
+.hero-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,.028)1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.028)1px,transparent 1px);background-size:56px 56px;animation:drift 40s linear infinite}
+@keyframes drift{to{background-position:0 112px}}
+.hero-glow{position:absolute;width:900px;height:900px;background:radial-gradient(circle,rgba(0,229,255,.055)0%,transparent 65%);top:-300px;right:-200px;pointer-events:none}
+.hero-glow2{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(255,107,53,.04)0%,transparent 65%);bottom:-200px;left:-100px;pointer-events:none}
+.hero-tag{position:relative;font-family:var(--mono);font-size:.68rem;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:2rem;display:inline-flex;align-items:center;gap:.75rem}
+.hero-tag::before{content:'';width:40px;height:1px;background:var(--accent)}
+.blink{animation:blink .8s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+h1{font-family:var(--cond);font-size:clamp(3.8rem,10vw,9rem);font-weight:900;line-height:.88;color:var(--bright);text-transform:uppercase;letter-spacing:-2px;margin-bottom:.4rem;position:relative}
+h1 .cyan{color:var(--accent)}
+h1 .org{color:var(--accent2)}
+.hero-sub{font-size:1.05rem;color:var(--dim);max-width:580px;margin-top:1.8rem;margin-bottom:3.5rem;font-weight:300;line-height:1.85}
+.hero-stats{display:flex;gap:3rem;flex-wrap:wrap;position:relative}
+.stat{border-left:2px solid var(--accent);padding-left:1.1rem}
+.stat-val{font-family:var(--mono);font-size:2.2rem;color:var(--accent);display:block;line-height:1}
+.stat-label{font-size:.68rem;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-top:.3rem;display:block}
+.hero-scroll{position:absolute;bottom:2.5rem;right:3rem;font-family:var(--mono);font-size:.6rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;writing-mode:vertical-lr;display:flex;align-items:center;gap:.75rem}
+.hero-scroll::before{content:'';width:1px;height:60px;background:linear-gradient(to bottom,var(--accent),transparent)}
+.wrap{max-width:1260px;margin:0 auto;padding:0 2.5rem}
+.section{padding:5rem 0;border-bottom:1px solid var(--border)}
+.section-header{display:flex;align-items:baseline;gap:1.25rem;margin-bottom:3rem}
+.sec-num{font-family:var(--mono);font-size:.62rem;color:var(--accent2);letter-spacing:2.5px}
+h2{font-family:var(--cond);font-size:clamp(2.2rem,4.5vw,3.5rem);font-weight:900;text-transform:uppercase;color:var(--bright);letter-spacing:-.5px}
+h2 em{font-style:normal;color:var(--accent)}
+h3{font-family:var(--cond);font-size:1.45rem;font-weight:700;text-transform:uppercase;color:var(--bright);margin-bottom:.6rem;letter-spacing:.5px}
+p{color:var(--text);margin-bottom:.75rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.5px;background:var(--border);outline:1px solid var(--border)}
+.card{background:var(--bg2);padding:2rem;position:relative;overflow:hidden;transition:background .25s}
+.card:hover{background:var(--bg3)}
+.card::after{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--accent);transition:height .35s ease}
+.card:hover::after{height:100%}
+.card-icon{font-size:2.2rem;margin-bottom:1.1rem;display:block}
+.card ul{list-style:none;margin-top:.75rem}
+.card ul li{font-size:.85rem;color:var(--dim);padding:.2rem 0 .2rem 1rem;position:relative}
+.card ul li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-size:.65rem;top:.35rem}
+.tool-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;align-items:center;gap:0;border:1px solid var(--border);border-bottom:none;background:var(--bg2);transition:background .2s}
+.tool-row:last-child{border-bottom:1px solid var(--border)}
+.tool-row:hover{background:var(--bg3)}
+.tool-row.header{background:var(--bg3);border-color:var(--border)}
+.tool-cell{padding:1rem 1.25rem;border-right:1px solid var(--border);font-size:.85rem}
+.tool-cell:last-child{border-right:none;text-align:center}
+.tool-row.header .tool-cell{font-family:var(--mono);font-size:.6rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
+.tool-name{font-weight:600;color:var(--bright)}
+.badge{display:inline-block;padding:.2rem .65rem;border-radius:2px;font-family:var(--mono);font-size:.6rem;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.badge-free{background:rgba(57,255,20,.1);color:var(--accent3);border:1px solid rgba(57,255,20,.2)}
+.badge-pay{background:rgba(255,107,53,.1);color:var(--accent2);border:1px solid rgba(255,107,53,.2)}
+.badge-os{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
+.dl-link{font-family:var(--mono);font-size:.65rem;color:var(--accent);text-decoration:none;letter-spacing:1px;padding:.35rem .75rem;border:1px solid rgba(0,229,255,.25);transition:all .2s;white-space:nowrap;display:inline-block}
+.dl-link:hover{background:var(--accent);color:#000}
+.steps{margin-top:2rem;display:flex;flex-direction:column;gap:0;border:1px solid var(--border)}
+.step{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{width:64px;min-width:64px;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem 0;font-family:var(--mono);font-size:2rem;color:rgba(0,229,255,.12);font-weight:900;border-right:1px solid var(--border)}
+.step-body{padding:1.5rem;flex:1}
+.step-body h4{font-family:var(--cond);font-size:1.1rem;text-transform:uppercase;color:var(--bright);letter-spacing:.5px;margin-bottom:.5rem}
+.step-body p{font-size:.88rem;color:var(--dim);margin-bottom:.4rem}
+.step-body code{font-family:var(--mono);font-size:.78rem;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.12);color:var(--accent);padding:.15rem .5rem;border-radius:2px}
+.code-block{background:#050709;border:1px solid var(--border);border-left:3px solid var(--accent);padding:1.5rem 1.75rem;margin:1.5rem 0;position:relative;overflow-x:auto}
+.code-block pre{font-family:var(--mono);font-size:.8rem;color:#8be9fd;line-height:1.9}
+.code-block .comment{color:var(--dim)}
+.code-block .keyword{color:var(--accent2)}
+.code-block .string{color:var(--accent3)}
+.code-label{position:absolute;top:.6rem;right:.8rem;font-family:var(--mono);font-size:.55rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
+.callout{margin:1.5rem 0;padding:1.25rem 1.5rem;border-left:3px solid var(--warn);background:rgba(255,209,102,.04);display:flex;gap:1rem;align-items:flex-start}
+.callout-icon{font-size:1.2rem;margin-top:.1rem;flex-shrink:0}
+.callout p{font-size:.88rem;color:var(--text);margin:0}
+.callout strong{color:var(--warn)}
+.callout-info{border-color:var(--accent);background:rgba(0,229,255,.04)}
+.callout-info strong{color:var(--accent)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--border);outline:1px solid var(--border);margin-top:2rem}
+.info-block{background:var(--bg2);padding:2rem}
+.info-block h3{margin-bottom:1rem}
+.info-block ul{list-style:none}
+.info-block ul li{padding:.3rem 0 .3rem 1.25rem;font-size:.88rem;color:var(--dim);position:relative;border-bottom:1px solid rgba(255,255,255,.03)}
+.info-block ul li::before{content:'─';position:absolute;left:0;color:var(--accent2)}
+.spec-table{width:100%;border-collapse:collapse;margin-top:1.5rem;font-size:.85rem}
+.spec-table th{font-family:var(--mono);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:.75rem 1rem;text-align:left;background:var(--bg3);border:1px solid var(--border)}
+.spec-table td{padding:.7rem 1rem;border:1px solid var(--border);color:var(--dim)}
+.spec-table tr:hover td{background:var(--bg3)}
+.spec-table td:first-child{color:var(--bright);font-weight:600}
+.good{color:#39ff14!important}
+.mid{color:var(--warn)!important}
+.bad{color:var(--accent2)!important}
+.exercises{padding:5rem 0 7rem}
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5px;background:var(--border);outline:1px solid var(--border);margin-top:2.5rem}
+.ex-card{background:var(--bg2);padding:2rem;position:relative;overflow:hidden;transition:background .25s}
+.ex-card:hover{background:var(--bg3)}
+.ex-num{font-family:var(--mono);font-size:3rem;color:rgba(0,229,255,.07);font-weight:900;position:absolute;top:.75rem;right:1.25rem;line-height:1;user-select:none}
+.ex-level{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.58rem;letter-spacing:2px;text-transform:uppercase;padding:.25rem .65rem;margin-bottom:1rem}
+.iniciante{background:rgba(57,255,20,.08);color:#39ff14;border:1px solid rgba(57,255,20,.18)}
+.intermediario{background:rgba(255,209,102,.08);color:var(--warn);border:1px solid rgba(255,209,102,.18)}
+.avancado{background:rgba(255,107,53,.08);color:var(--accent2);border:1px solid rgba(255,107,53,.18)}
+.ex-card h3{font-family:var(--cond);font-size:1.3rem;text-transform:uppercase;color:var(--bright);margin-bottom:.6rem}
+.ex-card p{font-size:.87rem;color:var(--dim);margin-bottom:1rem}
+.ex-tools{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.ex-tool-tag{font-family:var(--mono);font-size:.6rem;color:var(--accent);background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.14);padding:.2rem .55rem;letter-spacing:.5px}
+.ex-objective{border-top:1px solid var(--border);padding-top:1rem;margin-top:.25rem}
+.ex-objective span{font-family:var(--mono);font-size:.58rem;color:var(--accent2);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:.4rem}
+.ex-objective p{font-size:.82rem;color:var(--text);margin:0}
+details summary{cursor:pointer;list-style:none;font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:1.5px;margin-top:.75rem;text-transform:uppercase;user-select:none}
+details summary::before{content:'[+] '}
+details[open] summary::before{content:'[-] '}
+details p{font-size:.82rem;color:var(--dim);margin-top:.5rem;padding-left:.75rem;border-left:2px solid rgba(0,229,255,.18)}
+footer{padding:3rem 2.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+footer p{font-family:var(--mono);font-size:.65rem;color:var(--dim);letter-spacing:1px}
+footer span{color:var(--accent)}
+@media(max-width:768px){h1{font-size:3.5rem}.two-col{grid-template-columns:1fr}.tool-row{grid-template-columns:1fr 1fr}.tool-cell:nth-child(3),.tool-cell:nth-child(4),.tool-row.header .tool-cell:nth-child(3),.tool-row.header .tool-cell:nth-child(4){display:none}nav{gap:1.2rem}.hero-stats{gap:2rem}.hero{padding:3rem 1.5rem}.wrap{padding:0 1.5rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">HW<span>://</span>ADV</div>
+  <a href="#fundamentos">Fundamentos</a>
+  <a href="#ferramentas">Ferramentas</a>
+  <a href="#cpu">CPU/RAM</a>
+  <a href="#armazenamento">Armazenamento</a>
+  <a href="#rede">Rede</a>
+  <a href="#diagnostico">Diagnóstico</a>
+  <a href="#bios">BIOS</a>
+  <a href="#exercicios">Exercícios</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-tag">Módulo Avançado &nbsp;<span class="blink">█</span></div>
+  <h1>HARDWARE<br><span class="cyan">AVANÇADO</span><br><span class="org">&amp; ANÁLISE</span></h1>
+  <p class="hero-sub">Diagnóstico profundo, benchmarking real, monitoramento de baixo nível e análise de componentes. Do BIOS ao barramento PCIe — domine cada camada do hardware.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-val">12</span><span class="stat-label">Ferramentas cobertas</span></div>
+    <div class="stat"><span class="stat-val">7</span><span class="stat-label">Módulos de teoria</span></div>
+    <div class="stat"><span class="stat-val">10</span><span class="stat-label">Exercícios práticos</span></div>
+    <div class="stat"><span class="stat-val">3</span><span class="stat-label">Níveis de dificuldade</span></div>
+  </div>
+  <div class="hero-scroll">SCROLL</div>
+</div>
+
+<div class="wrap">
+
+<!-- MOD 01 -->
+<section id="fundamentos" class="section">
+  <div class="section-header"><span class="sec-num">MOD_01</span><h2>Fundamentos <em>Avançados</em></h2></div>
+  <p>Antes de mergulhar nas ferramentas, é essencial entender o que acontece internamente em cada subsistema. Hardware avançado cobre quatro grandes domínios de análise:</p>
+  <div class="card-grid" style="margin-top:2rem">
+    <div class="card">
+      <span class="card-icon">🧠</span>
+      <h3>CPU &amp; Cache</h3>
+      <p>Registradores, pipeline, hierarquia de cache L1/L2/L3, hyperthreading, boost clocks e TDP real vs nominal.</p>
+      <ul>
+        <li>Instruções por ciclo (IPC)</li>
+        <li>Branch prediction &amp; speculative execution</li>
+        <li>Thermal throttling e power limits (PL1/PL2)</li>
+        <li>Microarquitetura (Zen 4, Raptor Lake)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">🗄️</span>
+      <h3>Memória RAM</h3>
+      <p>Timings CAS, sub-timings, dual-rank vs single-rank, JEDEC vs XMP/EXPO e latência real medida.</p>
+      <ul>
+        <li>tCL, tRCD, tRP, tRAS primários</li>
+        <li>Frequência vs latência absoluta</li>
+        <li>Topologia daisy-chain vs T-topology</li>
+        <li>IMC (Integrated Memory Controller)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">💽</span>
+      <h3>Armazenamento</h3>
+      <p>NVMe PCIe Gen4/5, SATA AHCI, QD (Queue Depth), latência de acesso aleatório 4K e endurance TBW.</p>
+      <ul>
+        <li>Sequential vs Random I/O</li>
+        <li>SLC/MLC/TLC/QLC NAND</li>
+        <li>Wear leveling &amp; TRIM</li>
+        <li>HMB (Host Memory Buffer)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">🌐</span>
+      <h3>Rede &amp; Barramentos</h3>
+      <p>PCIe lanes, largura de banda, USB 3.2/4.0, Thunderbolt 4 e análise de gargalos de I/O.</p>
+      <ul>
+        <li>PCIe 3.0 vs 4.0 vs 5.0 bandwidth</li>
+        <li>Bifurcação e switching de lanes</li>
+        <li>Latência de rede (jitter, packet loss)</li>
+        <li>Chipset vs CPU lanes diretas</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">⚡</span>
+      <h3>Energia &amp; Térmica</h3>
+      <p>VRM (Voltage Regulator Module), fases de energia, eficiência 80 PLUS, temperatura de junção vs case.</p>
+      <ul>
+        <li>Ripple de voltagem</li>
+        <li>TjMax e Tcase</li>
+        <li>Curva P-State / C-State</li>
+        <li>PSU wattage real vs pico</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">🎮</span>
+      <h3>GPU Avançado</h3>
+      <p>VRAM bandwidth, shader occupancy, PCIe bandwidth vs VRAM bandwidth, core clocks e memory clocks.</p>
+      <ul>
+        <li>ROPs, TMUs, CUDA/Compute Units</li>
+        <li>Power limit e voltage curve</li>
+        <li>GDDR6 vs GDDR6X vs HBM3</li>
+        <li>PCIe riser degradation</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:2.5rem">
+    <span class="callout-icon">⚠️</span>
+    <p><strong>Atenção:</strong> Monitoramento de hardware em baixo nível pode requerer desabilitar o <strong>Secure Boot</strong> e habilitar acesso a drivers não assinados. Faça sempre em ambiente controlado quando testar novas ferramentas.</p>
+  </div>
+</section>
+
+<!-- MOD 02 -->
+<section id="ferramentas" class="section">
+  <div class="section-header"><span class="sec-num">MOD_02</span><h2>Ferramentas: <em>O Que Baixar</em></h2></div>
+  <p>As ferramentas abaixo cobrem monitoramento, stress test, benchmark e análise profunda. Todas têm versão gratuita funcional para aprendizado.</p>
+  <div style="margin-top:2rem">
+    <div class="tool-row header">
+      <div class="tool-cell">Ferramenta</div>
+      <div class="tool-cell">Função</div>
+      <div class="tool-cell">Licença</div>
+      <div class="tool-cell">Download</div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">HWiNFO64</span><br><small style="color:var(--dim);font-size:.72rem">Monitoramento completo</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Sensores de CPU, GPU, memória, VRM, voltagens em tempo real com log CSV</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.hwinfo.com/download/" target="_blank">→ hwinfo.com</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">CPU-Z</span><br><small style="color:var(--dim);font-size:.72rem">Info de CPU/RAM</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Stepping, timings de memória, cache, multipliers, perfis XMP/SPD</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.cpuid.com/softwares/cpu-z.html" target="_blank">→ cpuid.com</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">GPU-Z</span><br><small style="color:var(--dim);font-size:.72rem">Info de GPU</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Shader clocks, memory type, bandwidth, VBIOS version, subsystem ID</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.techpowerup.com/gpuz/" target="_blank">→ techpowerup.com</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">CrystalDiskInfo</span><br><small style="color:var(--dim);font-size:.72rem">Saúde de SSD/HD</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Dados SMART completos, horas de uso, temperatura, TBW restante</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://crystalmark.info/en/software/crystaldiskinfo/" target="_blank">→ crystalmark.info</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">CrystalDiskMark</span><br><small style="color:var(--dim);font-size:.72rem">Benchmark de disco</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Seq/Rand leitura-escrita em vários tamanhos de bloco e queue depths</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://crystalmark.info/en/software/crystaldiskmark/" target="_blank">→ crystalmark.info</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">AIDA64 Extreme</span><br><small style="color:var(--dim);font-size:.72rem">Stress test completo</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Stress CPU, FPU, cache e memória simultâneos; benchmark detalhado</div>
+      <div class="tool-cell"><span class="badge badge-pay">Trial 30d</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.aida64.com/downloads" target="_blank">→ aida64.com</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">Prime95</span><br><small style="color:var(--dim);font-size:.72rem">Stress CPU / RAM</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Teste de estabilidade AVX/AVX-512, SmallFFTs, Blend; detecta erros</div>
+      <div class="tool-cell"><span class="badge badge-os">Open Source</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.mersenne.org/download/" target="_blank">→ mersenne.org</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">MemTest86</span><br><small style="color:var(--dim);font-size:.72rem">Teste RAM bootável</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Teste via USB bootável, detecta erros de bit com múltiplos padrões</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.memtest86.com/download.htm" target="_blank">→ memtest86.com</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">MSI Afterburner</span><br><small style="color:var(--dim);font-size:.72rem">OC &amp; monitor GPU</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Voltage curve, power limit, fan curve personalizada, overlay em tempo real</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.msi.com/Landing/afterburner" target="_blank">→ msi.com</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">Cinebench R23/2024</span><br><small style="color:var(--dim);font-size:.72rem">Benchmark CPU</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Score nC (multi-core) e 1C (single-core) com comparativo global online</div>
+      <div class="tool-cell"><span class="badge badge-free">Gratuito</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.maxon.net/cinebench" target="_blank">→ maxon.net</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">3DMark</span><br><small style="color:var(--dim);font-size:.72rem">Benchmark GPU</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Fire Strike, Time Spy, Port Royal (RT), PCIe bandwidth test integrado</div>
+      <div class="tool-cell"><span class="badge badge-free">Free Basic</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.3dmark.com" target="_blank">→ 3dmark.com</a></div>
+    </div>
+    <div class="tool-row">
+      <div class="tool-cell"><span class="tool-name">Wireshark</span><br><small style="color:var(--dim);font-size:.72rem">Análise de rede</small></div>
+      <div class="tool-cell" style="font-size:.83rem;color:var(--dim)">Captura de pacotes, análise de protocolos, troubleshoot de NIC e cabos</div>
+      <div class="tool-cell"><span class="badge badge-os">Open Source</span></div>
+      <div class="tool-cell"><a class="dl-link" href="https://www.wireshark.org/download.html" target="_blank">→ wireshark.org</a></div>
+    </div>
+  </div>
+  <div class="callout callout-info" style="margin-top:2rem">
+    <span class="callout-icon">ℹ️</span>
+    <p><strong>Linux:</strong> Use <code>lm-sensors</code>, <code>smartmontools</code>, <code>stress-ng</code>, <code>iperf3</code> e <code>sysbench</code> — cobrem praticamente tudo via terminal sem custo.</p>
+  </div>
+</section>
+
+<!-- MOD 03 -->
+<section id="cpu" class="section">
+  <div class="section-header"><span class="sec-num">MOD_03</span><h2>CPU &amp; Memória: <em>Como Usar</em></h2></div>
+  <h3>HWiNFO64 — Configuração Essencial</h3>
+  <p>O HWiNFO64 é a ferramenta mais completa para monitoramento em tempo real. Siga este fluxo:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h4>Abrir em Modo Sensores</h4>
+        <p>Ao abrir, marque <code>Sensors Only</code> para ir direto ao painel. Desmarque <code>Show Summary Window</code> para a janela principal compacta. Isso evita a tela de resumo e vai direto aos dados.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h4>Configurar Sensores Relevantes</h4>
+        <p>Clique com botão direito em qualquer sensor → <code>Add to Tray</code> para monitorar na bandeja. Essenciais: <code>CPU (Tctl/Tdie)</code> temperatura real, <code>CPU Package Power</code>, <code>DRAM Voltage</code>, <code>VCore</code>, <code>CPU Clock</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <h4>Logar Dados com CSV</h4>
+        <p>Settings → <code>Start Logging on Startup</code> → intervalo de <code>1000ms</code>. Gera CSV para análise em Excel ou Python. Essencial para caçar throttling intermitente que não aparece em monitoramento manual.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <h4>Interpretar CPU Power Limits</h4>
+        <p>Observe <code>CPU Package Power</code> vs <code>PL1</code> e <code>PL2</code>. Se Package Power fica travado exatamente no PL1 por mais de 56 segundos, o sistema está limitado por energia — não por temperatura. Procure "Power Limit Throttling = Yes" nos sensores.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:3rem">CPU-Z — Lendo Timings de Memória</h3>
+  <div class="two-col">
+    <div class="info-block">
+      <h3>Aba SPD</h3>
+      <ul>
+        <li>Slot selecionado (compare os dois pentes)</li>
+        <li>Max bandwidth nominal JEDEC</li>
+        <li>Perfis XMP/EXPO disponíveis e timings</li>
+        <li>Fabricante real do chip (Hynix/Samsung/Micron)</li>
+        <li>Date code: semana e ano de fabricação</li>
+      </ul>
+    </div>
+    <div class="info-block">
+      <h3>Aba Memory</h3>
+      <ul>
+        <li>Frequência real rodando no momento</li>
+        <li>Timings primários: tCL-tRCD-tRP-tRAS</li>
+        <li>Command Rate (1T ou 2T)</li>
+        <li>DRAM Frequency (metade da DDR efetiva)</li>
+        <li>Dual Channel confirmado ou não</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:3rem">Comparativo: Latência Absoluta vs Frequência</h3>
+  <table class="spec-table">
+    <thead><tr><th>Configuração</th><th>Frequência</th><th>CAS (tCL)</th><th>Latência Absoluta</th><th>Avaliação</th></tr></thead>
+    <tbody>
+      <tr><td>DDR4-3200 CL14</td><td>3200 MHz</td><td>14</td><td>8.75 ns</td><td class="good">Excelente</td></tr>
+      <tr><td>DDR4-3600 CL16</td><td>3600 MHz</td><td>16</td><td>8.89 ns</td><td class="good">Ótimo</td></tr>
+      <tr><td>DDR5-6000 CL30</td><td>6000 MHz</td><td>30</td><td>10.0 ns</td><td class="mid">Bom</td></tr>
+      <tr><td>DDR5-6400 CL32</td><td>6400 MHz</td><td>32</td><td>10.0 ns</td><td class="mid">Bom</td></tr>
+      <tr><td>DDR4-3200 CL22</td><td>3200 MHz</td><td>22</td><td>13.75 ns</td><td class="bad">Ruim</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:.8rem;color:var(--dim);margin-top:.75rem">Fórmula: Latência (ns) = (tCL / Frequência_MHz × 2000). Menor é sempre melhor.</p>
+</section>
+
+<!-- MOD 04 -->
+<section id="armazenamento" class="section">
+  <div class="section-header"><span class="sec-num">MOD_04</span><h2>Armazenamento <em>Avançado</em></h2></div>
+  <h3>CrystalDiskInfo — Interpretando SMART</h3>
+  <p>Os dados SMART são os sinais vitais do disco. Atributos críticos a monitorar:</p>
+  <table class="spec-table">
+    <thead><tr><th>Atributo SMART</th><th>ID</th><th>O que indica</th><th>Alerta se...</th></tr></thead>
+    <tbody>
+      <tr><td>Reallocated Sectors</td><td>05h</td><td>Setores remapeados por erros</td><td class="bad">Qualquer valor &gt; 0</td></tr>
+      <tr><td>Uncorrectable Errors</td><td>C6h</td><td>Erros sem correção ECC</td><td class="bad">Qualquer valor &gt; 0</td></tr>
+      <tr><td>Pending Sectors</td><td>C5h</td><td>Setores aguardando remap</td><td class="bad">Qualquer valor &gt; 0</td></tr>
+      <tr><td>Power On Hours</td><td>09h</td><td>Horas totais ligado</td><td class="mid">&gt; 30.000h (HDD)</td></tr>
+      <tr><td>Temperature</td><td>C2h</td><td>Temperatura atual</td><td class="mid">&gt; 55°C NVMe, &gt; 45°C HDD</td></tr>
+      <tr><td>TBW / Endurance</td><td>E9h</td><td>Vida útil restante %</td><td class="bad">&lt; 10% restante</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:3rem">CrystalDiskMark — Interpretando os Resultados</h3>
+  <div class="code-block">
+    <span class="code-label">NVMe PCIe Gen4 Típico</span>
+    <pre>
+<span class="comment">──────────────────────────────────────────────────</span>
+<span class="keyword">SEQ1M  Q8T1</span>   Read: <span class="string"> 7.100 MB/s</span>  Write: <span class="string">6.600 MB/s</span>
+<span class="keyword">SEQ1M  Q1T1</span>   Read: <span class="string"> 5.800 MB/s</span>  Write: <span class="string">5.200 MB/s</span>
+<span class="keyword">RND4K Q32T16</span>  Read: <span class="string">   850 MB/s</span>  Write: <span class="string">  710 MB/s</span>
+<span class="keyword">RND4K  Q1T1</span>   Read: <span class="string">    88 MB/s</span>  Write: <span class="string">   74 MB/s</span>
+<span class="comment">──────────────────────────────────────────────────</span>
+<span class="comment">  ↑ RND4K Q1T1 = uso real do dia a dia (mais importante)</span></pre>
+  </div>
+  <div class="two-col">
+    <div class="info-block">
+      <h3>SEQ (Sequencial)</h3>
+      <ul>
+        <li>Transferência de arquivos grandes (backups, vídeos)</li>
+        <li>Q8T1 = Queue Depth 8, Thread 1</li>
+        <li>Número anunciado na caixa pelo fabricante</li>
+        <li>Fácil de saturar com SLC write cache</li>
+        <li>Teste real: arquivo &gt; 50GB para forçar saída do cache</li>
+      </ul>
+    </div>
+    <div class="info-block">
+      <h3>RND 4K (Aleatório)</h3>
+      <ul>
+        <li>Operações do OS, apps, banco de dados</li>
+        <li>Q1T1 = uso real single-thread do dia a dia</li>
+        <li>Diferencia SSD barato de premium na prática</li>
+        <li>HDD: ~0.5 MB/s | SATA: ~50 MB/s | NVMe: ~88-120 MB/s</li>
+        <li>Latência NVMe: ~100µs vs HDD: ~10ms (100x mais rápido)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- MOD 05 -->
+<section id="rede" class="section">
+  <div class="section-header"><span class="sec-num">MOD_05</span><h2>Rede &amp; <em>Barramentos</em></h2></div>
+  <h3>Análise de NIC e Controlador de Rede</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h4>Identificar o Chipset da NIC</h4>
+        <p>Device Manager → Network Adapters → propriedades. O chipset real (Intel I225-V, Realtek 8125B) determina latência e CPU offloading. Intel NICs têm melhor latência e suportam RSS (Receive Side Scaling) para distribuir carga por múltiplos cores.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h4>Testar Throughput Real com iperf3</h4>
+        <p>Execute servidor na outra máquina: <code>iperf3 -s</code>, e no cliente:</p>
+        <div class="code-block" style="margin-top:.75rem">
+          <pre><span class="keyword">iperf3</span> -c 192.168.1.10 -t 30 -P 4 --bidir
+<span class="comment"># -P 4 = 4 streams paralelos (simula tráfego real)</span>
+<span class="comment"># --bidir = upload e download simultâneos</span>
+<span class="comment"># Resultado Gigabit esperado: ~940 Mbits/sec</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <h4>Wireshark — Filtros Essenciais</h4>
+        <p>Para hardware analysis: <code>tcp.analysis.retransmission</code> para instabilidade de rede; <code>icmp</code> para latência detalhada; <code>frame.len &lt; 64</code> para runt frames indicando problema físico (cabo, NIC com mau contato).</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:2.5rem">PCIe — Verificar Largura e Velocidade Real</h3>
+  <div class="code-block">
+    <span class="code-label">Windows PowerShell / Device Manager</span>
+    <pre>
+<span class="comment"># No GPU-Z: clique em "?" ao lado de Bus Interface</span>
+<span class="comment"># para forçar um teste de link width ativo</span>
+
+<span class="keyword">GPU:</span>   PCIe 4.0 x16 = <span class="string">32 GB/s</span> bidirecional
+<span class="keyword">NVMe:</span>  PCIe 4.0 x4  = <span class="string"> 8 GB/s</span> bidirecional
+<span class="keyword">PCIe 3.0 x16:</span>         = <span class="string">16 GB/s</span> bidirecional
+
+<span class="comment"># "x8 @ x16" no GPU-Z = slot é x16 mas só x8 elétrico</span>
+<span class="comment"># Perda de 5-8% (high-end), até 25% (RTX 4090, RX 7900)</span></pre>
+  </div>
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <p><strong>Dica:</strong> Muitas placas B-series reduzem o slot primário para x8 quando um segundo SSD NVMe é instalado no slot M.2 secundário. Verifique o manual da placa-mãe para as restrições de bifurcação de lanes.</p>
+  </div>
+</section>
+
+<!-- MOD 06 -->
+<section id="diagnostico" class="section">
+  <div class="section-header"><span class="sec-num">MOD_06</span><h2>Stress Test &amp; <em>Diagnóstico</em></h2></div>
+  <h3>Protocolo de Stress Test — Ordem Correta</h3>
+  <p>Teste cada componente em isolamento antes de combinar:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h4>RAM Primeiro — MemTest86 (2 passes)</h4>
+        <p>RAM com erro causa crashes em qualquer stress test subsequente. Grave em USB bootável, reinicie e aguarde 2 passes completos (~4h para 32GB). Qualquer erro vermelho = problema real de memória.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h4>CPU Isolado — Prime95 SmallFFTs (30min)</h4>
+        <p>SmallFFTs estressam maximamente o núcleo sem afetar RAM. Use com HWiNFO64 aberto monitorando temperatura e power. Se temperatura superar <strong>95°C Intel</strong> ou <strong>90°C AMD Tdie</strong>, pare e revise pasta térmica e cooler.</p>
+        <div class="code-block" style="margin-top:.75rem">
+          <pre><span class="comment"># No Prime95: Options → Torture Test</span>
+<span class="string">Small FFTs</span>   <span class="comment">→ Máximo calor CPU, mínimo RAM</span>
+<span class="string">Large FFTs</span>   <span class="comment">→ Estressam L3 cache e RAM também</span>
+<span class="string">Blend</span>        <span class="comment">→ Mix CPU + RAM (use por último)</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <h4>GPU — FurMark (15-20min) + Afterburner</h4>
+        <p>Monitore: GPU Temp (max 85°C), VRAM Temp (max 95°C para GDDR6X), GPU Power (deve estabilizar no TDP configurado). Se temp subir além do limite, verifique pasta térmica da GPU e fluxo de ar do case.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <h4>AIDA64 Full System — 1 Hora</h4>
+        <p>Com os três anteriores OK, rode AIDA64 com CPU + FPU + Cache + Memory + GPU por 1 hora. Revela problemas de PSU (quedas de voltagem), VRM superaquecendo, e pasta térmica inadequada em carga combinada real.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:3rem">Tabela de Temperaturas de Referência</h3>
+  <table class="spec-table">
+    <thead><tr><th>Componente</th><th>Normal Idle</th><th>Normal Carga</th><th>Preocupante</th><th>Crítico</th></tr></thead>
+    <tbody>
+      <tr><td>CPU Intel (Tjunction)</td><td>30–45°C</td><td>70–85°C</td><td class="mid">85–95°C</td><td class="bad">&gt;100°C</td></tr>
+      <tr><td>CPU AMD (Tdie)</td><td>35–50°C</td><td>70–90°C</td><td class="mid">90–95°C</td><td class="bad">&gt;95°C</td></tr>
+      <tr><td>GPU Core</td><td>30–50°C</td><td>70–83°C</td><td class="mid">83–90°C</td><td class="bad">&gt;90°C</td></tr>
+      <tr><td>NVMe SSD</td><td>30–45°C</td><td>55–70°C</td><td class="mid">70–80°C</td><td class="bad">&gt;80°C</td></tr>
+      <tr><td>HDD</td><td>25–35°C</td><td>35–45°C</td><td class="mid">45–55°C</td><td class="bad">&gt;60°C</td></tr>
+      <tr><td>VRM Motherboard</td><td>40–60°C</td><td>70–90°C</td><td class="mid">90–110°C</td><td class="bad">&gt;115°C</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- MOD 07 -->
+<section id="bios" class="section">
+  <div class="section-header"><span class="sec-num">MOD_07</span><h2>BIOS &amp; <em>Configurações</em></h2></div>
+  <div class="card-grid">
+    <div class="card">
+      <span class="card-icon">⚙️</span>
+      <h3>XMP / EXPO</h3>
+      <p>Habilitar libera o perfil otimizado da RAM. Procure em <strong>AI Tweaker / OC / Extreme Tweaker</strong> dependendo do fabricante.</p>
+      <ul>
+        <li>XMP 3.0: suportado por Intel Alder Lake+</li>
+        <li>EXPO: padrão AMD para Ryzen 7000+</li>
+        <li>Se instável: tente o segundo perfil XMP</li>
+        <li>Confirmar com CPU-Z aba Memory após reboot</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">🔋</span>
+      <h3>Power Limits</h3>
+      <p>PL1 = limite sustentado (long-term). PL2 = boost de curto prazo. Muitos OEMs deixam ambos no máximo, causando throttling.</p>
+      <ul>
+        <li>Intel: "Long/Short Duration Power Limit"</li>
+        <li>AMD: PPT/TDC/EDC configuráveis</li>
+        <li>Reduzir PL1 melhora thermals sem perder muito</li>
+        <li>PBO (AMD) para boost inteligente automático</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">🌀</span>
+      <h3>Fan Curves (PWM)</h3>
+      <p>Curvas de fan no BIOS permitem controle preciso de temperatura vs ruído. Use modo <strong>PWM</strong> para controle granular.</p>
+      <ul>
+        <li>40°C → 30% PWM (silencioso)</li>
+        <li>80°C → 80% PWM (carga normal)</li>
+        <li>90°C → 100% PWM (emergência)</li>
+        <li>Zero RPM mode abaixo de 40°C</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">🔬</span>
+      <h3>Resizable BAR / SAM</h3>
+      <p>Permite à CPU acessar toda VRAM da GPU. Ganho de 5–15% em jogos modernos sem custo.</p>
+      <ul>
+        <li>Requer: "Above 4G Decoding" habilitado</li>
+        <li>Intel: padrão em Z690+ (Alder Lake)</li>
+        <li>AMD SAM: B550/X570 com BIOS atualizado</li>
+        <li>Verificar em GPU-Z: "Resizable BAR: Yes"</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">🛡️</span>
+      <h3>Secure Boot &amp; TPM</h3>
+      <p>Secure Boot impede drivers não assinados. Necessário desabilitar para algumas ferramentas de diagnóstico de baixo nível.</p>
+      <ul>
+        <li>MemTest86: funciona com Secure Boot ON</li>
+        <li>Alguns drivers de OC: requerem desabilitar</li>
+        <li>TPM 2.0: necessário para Windows 11</li>
+        <li>Reabilitar sempre após testes concluídos</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-icon">📡</span>
+      <h3>PCIe Gen Lock</h3>
+      <p>Forçar PCIe Gen específico garante que dispositivos operem na velocidade correta e evita auto-negotiation bugs.</p>
+      <ul>
+        <li>Slot M.2: Gen3/4/5 — verifique suporte do SSD</li>
+        <li>Slot GPU: sempre maximize (Gen4 ou Gen5)</li>
+        <li>Gen3 Force: para SSDs antigos com bugs Gen4</li>
+        <li>Confirmar velocidade ativa no GPU-Z/HWiNFO</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EXERCÍCIOS -->
+<section id="exercicios" class="exercises">
+  <div class="section-header"><span class="sec-num">LAB</span><h2>10 Exercícios <em>Práticos</em></h2></div>
+  <p>Do iniciante ao avançado — cada exercício foi desenhado para construir habilidade real com as ferramentas aprendidas. Complete-os na ordem para melhor progressão.</p>
+
+  <div class="ex-grid">
+
+    <div class="ex-card">
+      <div class="ex-num">01</div>
+      <span class="ex-level iniciante">● Iniciante</span>
+      <h3>Mapeamento Completo do Hardware</h3>
+      <p>Documente cada componente do seu sistema com as informações de baixo nível que as ferramentas expõem.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">HWiNFO64</span><span class="ex-tool-tag">CPU-Z</span><span class="ex-tool-tag">GPU-Z</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Criar uma tabela com: CPU stepping/revision/TDP real, RAM fabricante do chip/timings ativos/dual channel, GPU vbios/subvendor/compute units, SSD controlador/tipo NAND/firmware.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>No CPU-Z aba "CPU" anote "Stepping" e "Revision". Na aba "SPD" alterne entre slots para comparar os dois pentes. No GPU-Z clique no ícone de pasta para ver histórico de versões de VBIOS.</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">02</div>
+      <span class="ex-level iniciante">● Iniciante</span>
+      <h3>Auditoria de Saúde dos Discos</h3>
+      <p>Análise completa dos dados SMART e estimativa de vida útil restante de todos os discos do sistema.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">CrystalDiskInfo</span><span class="ex-tool-tag">CrystalDiskMark</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Para cada disco: registrar atributos SMART críticos (05, C5, C6, 09, C2, E9), rodar benchmark com 5 passes de 1GiB, comparar resultado com spec sheet do fabricante e classificar saúde geral com justificativa.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>No CrystalDiskMark, mude o tamanho de teste para 16GiB. Isso força o SSD a sair do SLC write cache e mostra a velocidade real da NAND TLC/QLC. A queda de velocidade entre 1GiB e 16GiB revela a capacidade do SLC cache.</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">03</div>
+      <span class="ex-level iniciante">● Iniciante</span>
+      <h3>Baseline de Temperatura em Idle</h3>
+      <p>Estabelecer linha de base de temperatura de todos os componentes em idle verdadeiro, sem processos em background.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">HWiNFO64</span><span class="ex-tool-tag">Task Manager</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Fechar todos os apps, aguardar 10 minutos, ativar logging no HWiNFO64 por 5 minutos. Registrar média e máximo de: CPU temp, GPU temp, SSD temp, VRM temp e CPU Package Power em idle verdadeiro.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>Ordene o Task Manager por CPU e feche qualquer processo consumindo acima de 1%. Desabilite temporariamente antivírus e Windows Update para idle verdadeiro. Esse baseline será sua referência para comparar futuros testes.</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">04</div>
+      <span class="ex-level intermediario">◆ Intermediário</span>
+      <h3>Comparativo XMP vs JEDEC</h3>
+      <p>Medir e comparar latência absoluta, bandwidth e performance real com e sem perfil XMP/EXPO ativo.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">CPU-Z</span><span class="ex-tool-tag">AIDA64</span><span class="ex-tool-tag">Cinebench R23</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Rodar AIDA64 Memory Benchmark e Cinebench nT em dois boots: JEDEC padrão e XMP/EXPO ativado. Calcular diferença percentual em Read/Write/Copy bandwidth e Memory Latency. Documentar os timings ativos em cada caso via CPU-Z.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>No AIDA64: Tools → Memory Benchmark. O campo "Memory Latency" em nanossegundos é onde XMP mais impacta workloads sensíveis. Para Ryzen 7000, XMP 6000MHz CL30 costuma dar a melhor relação frequência/IF (Infinity Fabric) 1:1.</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">05</div>
+      <span class="ex-level intermediario">◆ Intermediário</span>
+      <h3>Stress Test Isolado de CPU</h3>
+      <p>Validar estabilidade térmica e elétrica da CPU sob carga máxima, identificando throttling por temperatura ou por power limits.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">Prime95</span><span class="ex-tool-tag">HWiNFO64</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Rodar SmallFFTs por 30 minutos com log HWiNFO64. Abrir o CSV e criar gráfico de: temperatura, Package Power e Clock Speed. Identificar se houve throttling, classificar o tipo (thermal ou power limit) e propor solução.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>Throttling térmico: clock cai E temperatura está no TjMax. Throttling por power limit: clock cai mas temperatura está ~70°C e "Power Limit Throttling = YES" no HWiNFO64. São causas distintas com soluções distintas.</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">06</div>
+      <span class="ex-level intermediario">◆ Intermediário</span>
+      <h3>Benchmark de GPU e Análise PCIe</h3>
+      <p>Medir performance de GPU e verificar se o link PCIe está operando na largura e velocidade corretas.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">3DMark</span><span class="ex-tool-tag">GPU-Z</span><span class="ex-tool-tag">MSI Afterburner</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Rodar Time Spy e Fire Strike. No GPU-Z verificar Bus Interface durante o teste (deve mostrar PCIe x16). Comparar score com média global no site do 3DMark. Ativar overlay do Afterburner monitorando GPU Temp, Power, Core Clock e VRAM Usage.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>No GPU-Z, clique no "?" ao lado de Bus Interface para forçar um link test. O valor "x8 @ x16" significa que o slot é fisicamente x16 mas elétrico x8 — comum em placas B-series mid-range. Impacto depende da GPU: irrelevante em RTX 3060, significativo em RTX 4090.</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">07</div>
+      <span class="ex-level intermediario">◆ Intermediário</span>
+      <h3>Análise de Throughput de Rede Local</h3>
+      <p>Medir throughput real entre dois dispositivos e identificar gargalos de hardware ou software na stack de rede.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">iperf3</span><span class="ex-tool-tag">Wireshark</span><span class="ex-tool-tag">HWiNFO64</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Medir: TCP single stream, TCP multi-stream (4 threads), UDP com target 900Mbps. Capturar com Wireshark e medir CPU usage da NIC. Comparar Wi-Fi 6 vs Gigabit Ethernet e documentar jitter e packet loss em cada cenário.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>Servidor: <code>iperf3 -s</code> | TCP: <code>iperf3 -c [IP] -P 4 -t 20</code> | UDP: <code>iperf3 -c [IP] -u -b 900M -t 20</code>. No resultado UDP, jitter acima de 5ms indica problema. No Wireshark, filtre <code>tcp.analysis.retransmission</code> para ver retransmissões.</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">08</div>
+      <span class="ex-level avancado">■ Avançado</span>
+      <h3>Stress Test Full System — Protocolo 1h</h3>
+      <p>Validação completa de estabilidade do sistema sob carga máxima simultânea de todos os subsistemas com análise de dados.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">AIDA64</span><span class="ex-tool-tag">HWiNFO64</span><span class="ex-tool-tag">CrystalDiskMark</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Rodar AIDA64 System Stability (CPU+FPU+Cache+Memory+GPU) por 60 minutos com log contínuo. Executar CrystalDiskMark em loop simultâneo. Analisar CSV e criar relatório identificando picos térmicos, quedas de clock e variações de voltagem com correlações temporais.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>No Excel, crie gráficos de linha sobrepostos para temp CPU, temp GPU, CPU Core Voltage e CPU Clock com o mesmo eixo de tempo. Quedas de clock correlacionadas com temperatura = thermal throttle. Quedas com temp OK = power limit ou VRM throttle (verifique VRM temp também).</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">09</div>
+      <span class="ex-level avancado">■ Avançado</span>
+      <h3>Otimização Manual de Timings RAM</h3>
+      <p>Ajuste manual de sub-timings de RAM para maximizar latência e bandwidth mantendo estabilidade total comprovada.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">BIOS</span><span class="ex-tool-tag">MemTest86</span><span class="ex-tool-tag">AIDA64</span><span class="ex-tool-tag">CPU-Z</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Partindo do perfil XMP: reduzir tCL em 2 passos, validar com MemTest86 (1 pass), medir latência com AIDA64. Repetir para tRCD e tRP. Documentar: cada configuração testada, resultado do MemTest e latência medida em cada etapa.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>Mude UM timing por vez e valide antes de continuar. Se MemTest86 detectar erros, aumente 1 step e valide novamente. Kits DDR5 frequentemente toleram tCL28-30 mesmo vendidos como CL36 — o potencial depende do die (Samsung B-die, Hynix M-die, etc.).</p>
+      </details>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-num">10</div>
+      <span class="ex-level avancado">■ Avançado</span>
+      <h3>Diagnóstico de Instabilidade Intermitente</h3>
+      <p>Identificar a causa raiz de crashes esporádicos por meio de evidências múltiplas e cruzamento de dados de hardware.</p>
+      <div class="ex-tools"><span class="ex-tool-tag">HWiNFO64</span><span class="ex-tool-tag">MemTest86</span><span class="ex-tool-tag">Event Viewer</span><span class="ex-tool-tag">Prime95</span><span class="ex-tool-tag">CrystalDiskInfo</span></div>
+      <div class="ex-objective">
+        <span>Objetivo</span>
+        <p>Montar relatório completo: (1) checar Event Viewer por IDs críticos (41, 129, 7), (2) verificar SMART para bad sectors, (3) MemTest86 completo 2 passes, (4) analisar log HWiNFO64 anterior ao crash, (5) Prime95 Blend 2h. Concluir com hipótese principal sustentada por evidências múltiplas cruzadas.</p>
+      </div>
+      <details>
+        <summary>Dica de execução</summary>
+        <p>Event Viewer: Windows Logs → System → filtrar Critical+Error. ID 41 = crash inesperado (kernel power), ID 129 = reset de controlador de disco, ID 7 = bad block. Combine com SMART: se ID 41 coincide com SSD temperature acima de 80°C nos logs do HWiNFO64, o disco superaquecendo é o suspeito principal.</p>
+      </details>
+    </div>
+
+  </div>
+
+  <!-- PRÓXIMOS PASSOS -->
+  <div style="margin-top:4rem;padding:2.5rem;border:1px solid var(--border);background:var(--bg2);position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(to bottom,var(--accent),var(--accent2))"></div>
+    <h3 style="margin-bottom:1.5rem;padding-left:1.25rem">Próximos Passos Recomendados</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem;padding-left:1.25rem">
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--accent);letter-spacing:2px;margin-bottom:.5rem">NÍVEL SEGUINTE</div>
+        <p style="font-size:.85rem;color:var(--dim)">Overclock de CPU (PBO2 Curve Optimizer, Intel XTU), undervolting de GPU com voltage curve editor para melhor perf/watt.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--accent2);letter-spacing:2px;margin-bottom:.5rem">LINUX EQUIV.</div>
+        <p style="font-size:.85rem;color:var(--dim)">Explore <code style="font-size:.78rem;color:var(--accent)">lm-sensors</code>, <code style="font-size:.78rem;color:var(--accent)">stress-ng</code>, <code style="font-size:.78rem;color:var(--accent)">fio</code> (I/O benchmark pro) e <code style="font-size:.78rem;color:var(--accent)">perf</code> (CPU profiler de baixo nível).</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--accent3);letter-spacing:2px;margin-bottom:.5rem">SCRIPTING</div>
+        <p style="font-size:.85rem;color:var(--dim)">Automatize coleta com Python + csv + matplotlib para criar relatórios visuais automáticos dos logs do HWiNFO64.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--warn);letter-spacing:2px;margin-bottom:.5rem">CERTIFICAÇÕES</div>
+        <p style="font-size:.85rem;color:var(--dim)">CompTIA A+ e Server+ para hardware. CompTIA Network+ para rede. SNIA certifications para armazenamento avançado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer>
+  <p>HW<span>://</span>ADV — Aula de Hardware Avançado</p>
+  <p>Gerado com <span>Claude</span> · Anthropic · 2026</p>
+</footer>
+
+<script>
+const stats = document.querySelectorAll('.stat-val');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      const el = e.target;
+      const target = parseInt(el.textContent);
+      let count = 0;
+      const step = Math.ceil(target/20);
+      const iv = setInterval(()=>{
+        count = Math.min(count+step,target);
+        el.textContent = count;
+        if(count>=target) clearInterval(iv);
+      },50);
+      obs.unobserve(el);
+    }
+  });
+},{threshold:.5});
+stats.forEach(s=>obs.observe(s));
+
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('nav a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-80)cur=s.id});
+  links.forEach(a=>{a.style.color=a.getAttribute('href')==='#'+cur?'var(--accent)':''});
+});
+</script>
+</body>
+</html>
